@@ -4,6 +4,8 @@
 # Author: Lucy Liu
 ##############################################################
 
+library(data.table)
+library(tidyverse)
 
 # Plot density plots of the 'ImageQuality_PowerLogLogSlope - '
 # values (for a selected channel) for each plate
@@ -12,7 +14,7 @@
 plot_plls <- function(
   df,       # df containing 'ImageQuality_PowerLogLogSlope' column
   channel   # channel of interest, as written in cell profiler 
-            # output, as string
+  # output, as string
 ){
   
   columnName <- paste("ImageQuality_PowerLogLogSlope_Orig",
@@ -45,8 +47,8 @@ filterImages <- function(
 ){
   
   # check no_IQR argument
-  assertthat::assert_that(is.numeric(no_images),
-                          length(no_images) == 1, 
+  assertthat::assert_that(is.numeric(no_IQR),
+                          length(no_IQR) == 1, 
                           msg = "Check 'no_IQR' is a single number")
   
   # get column names of the powerloglog of all channels
@@ -67,11 +69,11 @@ filterImages <- function(
     
     # create empty threshold vector
     threshold <- vector(mode = "numeric",
-                        length = length(columns))
+                        length = length(plls_columns))
     
     # fill vector with threshold for each powerloglog column
     
-    for (i in 1:length(columns)){
+    for (i in 1:length(plls_columns)){
       
       threshold[i] <- 
         quantile(reduced_df[,i][[1]], 0.25) - 
@@ -85,7 +87,7 @@ filterImages <- function(
     
     filter_rows <- apply(reduced_df, 1, function(x){
       sum(x > threshold) == length(plls_columns)}
-      )
+    )
     
     # subset using vector above
     filtered_df <- group_df[filter_rows,]
@@ -97,11 +99,85 @@ filterImages <- function(
   # per form function on grouped df
   
   return(
+    df %>%
+      group_by(Metadata_PlateID) %>%
+      do(threshold_fun(.))
+  )
+  
+}
+
+
+# Plot the number of images filtered 
+############################################
+
+
+plot_filtered <- function(
+  df,            # the filtered df
+  no_images,     # the number of images taken per well
+  wells = 384    # the number of wells per plate
+){
+  
+  # check inputs
+  assertthat::assert_that(is.numeric(no_images),
+                          length(no_images) == 1,
+                          msg = "Check 'no_images' is single number")
+  
+  assertthat::assert_that(is.numeric(wells),
+                          length(wells) == 1,
+                          msg = "Check 'wells' is single number")
+  
+  # make plot
   df %>%
     group_by(Metadata_PlateID) %>%
-    do(threshold_fun(.))
-  )
-
+    do(no_images * wells  - count(.)) %>%
+    ggplot(aes(y=n, x=Metadata_PlateID)) +
+    geom_bar(stat = "identity") +
+    labs(title = "Number of images filtered", y = "Number of images",
+         x = "Plate") + 
+    coord_flip()
+  
 }
+
+
+# Plot the difference between count unfiltered and count
+############################################################
+
+plot_countfilt <- function(
+  df      # df of raw data
+){
+  
+  df %>%
+    mutate(count_diff = Count_Cells_unfiltered - Count_Cells) %>%
+    ggplot(aes(x = count_diff)) +
+    geom_density() +
+    labs(title = "Difference between unfiltered & filtered count",
+         x = "Difference")
+  
+}
+
+
+table_countfilt <- function(
+  df,      # df of raw data
+  n = 10   # number of rows to show
+){
+  
+  df %>%
+    select(starts_with("Meta"), 
+           Count_Cells_unfiltered, 
+           Count_Cells) %>%
+    mutate(count_diff = Count_Cells_unfiltered - Count_Cells) %>%
+    arrange(desc(count_diff)) %>%
+    head(n=n)
+  
+}
+
+
+plot_countImg <- function(
+  df
+)
+
+
+
+
 
 
