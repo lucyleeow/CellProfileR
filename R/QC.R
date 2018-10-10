@@ -229,15 +229,23 @@ df_ImageQCcounts <- function(
   # Add column indicating whether count came from filtered or 
   # unfiltered df
   
-  summed_dfs[[1]]$Type <- "Full"
+  summed_dfs[[1]]$Type <- "Fullimages"
   
-  summed_dfs[[2]]$Type <- "Filtered"
+  summed_dfs[[2]]$Type <- "Filteredimages"
   
   # join dfs together
-  final_df <- rbind(summed_dfs[[1]], summed_dfs[[2]])
+  bound_df <- rbind(summed_dfs[[1]], summed_dfs[[2]])
   
+  # reshape into wide form
+  reshaped_df <- dcast(bound_df, 
+                    Metadata_PlateID + Metadata_WellID ~ Type,
+                    value.var = c("Count_Cells", 
+                                  "Count_Cells_unfiltered"))
+  # 
+  # final_df <- reshaped_df %>%
+  #   mutate(diff_filtered = )
   
-  return(final_df)
+  return(reshaped_df)
   
   # Author seems to really like lapply() today....
 }
@@ -248,20 +256,57 @@ df_ImageQCcounts <- function(
 ############################################################
 
 plot_countImageQC <- function(
-  df_full,       # df of raw unfiltered data
-  df_filtered    # df filtered of poor quality images (rows)
+  df_full,                  # df of raw unfiltered data
+  df_filtered,              # df filtered of poor quality images (rows)
+  CP_unfiltered = FALSE     # single logical indicating whether count or
+                            # count_unfiltered column (from CP filtering) 
+                            # is to be compared
 ){
+  
+  # check inputs
+  assertthat::assert_that(is.logical(count_unfiltered),
+                          length(count_unfiltered) == 1,
+                          msg = "Check 'count_unfiltered' is single logical")
+  
   
   # Use helper function to obtain df of count values
   count_df <- df_ImageQCcounts(df_full,df_filtered)
   
-  count_df
+  # columns to compare
+  CP_filtered <- colnames(count_df)[grep("Count_Cells_F",
+                                         colnames(count_df))]
+  CP_unfiltered <- colnames(count_df)[grep("unfiltered",
+                                           colnames(a))]
+  
+  if (count_unfiltered){
+    
+    diff_df <- count_df %>%
+      mutate(diff_filt = CP_unfiltered[2] - CP_unfiltered[1])
+    
+  }else{
+    
+    diff_df <- count_df %>%
+      mutate(diff_filt = CP_filtered[2] - CP_filtered[1])
+    
+  }
+  
+  # make plots
+  plots <- diff_df %>%
+    group_by(Metadata_PlateID) %>%
+    do(plots = ggplot(data = .,
+                      aes(x = diff_filt)) +
+         geom_density() + 
+         labs(title = .$Metadata_PlateID[1], y = "Density",
+              x = "Difference in count before and after image QC")
+    )
   
   
-  
-  
-  
+  return(plots$plots)
   
 }
+
+
+
+
 
 
