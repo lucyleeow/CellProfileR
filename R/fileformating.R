@@ -108,8 +108,7 @@ summarise_PerWell <- function(
     df_list <- list(df_count,df_median)
     # turn both dfs into data.table
     df_list <- lapply(df_list, as.data.table)
-    
- 
+  
     
     # get sum of count columns
     df_count <- df_list[[1]][ , lapply(.SD,
@@ -122,7 +121,6 @@ summarise_PerWell <- function(
 
 
     # as order is preserved, cbind columns together
-
     df_final <- cbind(df_count, df_median[ , 3:ncol(df_median)])
   
   }
