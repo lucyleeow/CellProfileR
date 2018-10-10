@@ -96,7 +96,7 @@ filterImages <- function(
     
   }
   
-  # per form function on grouped df
+  # perform function on grouped df
   
   return(
     df %>%
@@ -139,7 +139,10 @@ plot_filtered <- function(
 }
 
 
-# Plot the difference between count unfiltered and count
+# Plot the difference between 'count unfiltered' and 'count'
+# &
+# Produce df containing the n largest differences between 
+# count unfiltered and count
 ############################################################
 
 plot_countfilt <- function(
@@ -162,7 +165,8 @@ table_countfilt <- function(
 ){
   
   df %>%
-    select(starts_with("Meta"), 
+    select(starts_with("Meta"),
+           ImageNumber,
            Count_Cells_unfiltered, 
            Count_Cells) %>%
     mutate(count_diff = Count_Cells_unfiltered - Count_Cells) %>%
@@ -172,12 +176,92 @@ table_countfilt <- function(
 }
 
 
-plot_countImg <- function(
-  df
-)
+# Produce df containing per well 'count' & 'count_unfiltered' 
+# coloumns, of full raw data and image QC filtered data
+############################################################
+
+df_ImageQCcounts <- function(
+  df_full,       # df of raw unfiltered data
+  df_filtered    # df filtered of poor quality images (rows)
+){
+  
+  # check inputs
+  assertthat::assert_that(nrow(df_full)>nrow(df_filtered),
+                          msg = "Filtered df should be smaller than full df. Check arguments are in correct order")
+  
+  # create list of the 2 input dfs
+  df_list <- list(df_full, df_filtered)
+  
+  # convert both inputs to data.tables
+  df_list <- lapply(df_list, as.data.table)
+  
+  
+  # subset only count columns
+  
+  subset_fun <- function(df){
+    return(
+      df %>%
+        select(starts_with("Meta"), starts_with("Count"))
+    )
+  }
+  
+  ## apply function to list of inputs
+  subsetted_dfs <- lapply(df_list, subset_fun)
+
+  
+  # group by plate & well and sum counts
+  
+  ## vector of grouping column names
+  grouping_cols <- c("Metadata_PlateID", "Metadata_WellID")
+  
+  grouping_fun <- function(df){
+    
+    return(
+      df[ , lapply(.SD, function(x) sum(x, na.rm = TRUE)), 
+          by = grouping_cols]
+    )
+    
+  }
+  
+  ## apply function to list of inputs
+  summed_dfs <- lapply(subsetted_dfs, grouping_fun)
+  
+  # Add column indicating whether count came from filtered or 
+  # unfiltered df
+  
+  summed_dfs[[1]]$Type <- "Full"
+  
+  summed_dfs[[2]]$Type <- "Filtered"
+  
+  # join dfs together
+  final_df <- rbind(summed_dfs[[1]], summed_dfs[[2]])
+  
+  
+  return(final_df)
+  
+  # Author seems to really like lapply() today....
+}
 
 
+# Plot difference between count before and after removing poor
+# quality images
+############################################################
 
-
+plot_countImageQC <- function(
+  df_full,       # df of raw unfiltered data
+  df_filtered    # df filtered of poor quality images (rows)
+){
+  
+  # Use helper function to obtain df of count values
+  count_df <- df_ImageQCcounts(df_full,df_filtered)
+  
+  count_df
+  
+  
+  
+  
+  
+  
+}
 
 

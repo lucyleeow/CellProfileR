@@ -19,6 +19,7 @@ clean_df <- function(
   df_clean <- df %>% 
     select(Metadata_PlateID, 
            Metadata_WellID,
+           ImageNumber,
            Count_Cells,
            Count_Cells_unfiltered,
            starts_with("Median"),
@@ -119,13 +120,17 @@ summarise_PerWell <- function(
                           by = grouping_cols]
     
     # get median of median columns
-    df_final <- df[ , lapply(.SD, function(x) median(x, na.rm = TRUE)),
+    df_median <- df[ , lapply(.SD, function(x) median(x, na.rm = TRUE)),
                    by = grouping_cols]
+    
+    
+    # as order is preserved, cbind columns together
+    
+    df_final <- cbind(df_count, df_median[ , 3:ncol(df_median)])
   
   }
   
   return(df_final)
-  
   
 }
 
