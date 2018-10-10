@@ -264,29 +264,31 @@ plot_countImageQC <- function(
 ){
   
   # check inputs
-  assertthat::assert_that(is.logical(count_unfiltered),
-                          length(count_unfiltered) == 1,
-                          msg = "Check 'count_unfiltered' is single logical")
+  assertthat::assert_that(is.logical(CP_unfiltered),
+                          length(CP_unfiltered) == 1,
+                          msg = "Check 'CP_unfiltered' is single logical")
   
   
   # Use helper function to obtain df of count values
   count_df <- df_ImageQCcounts(df_full,df_filtered)
   
   # columns to compare
-  CP_filtered <- colnames(count_df)[grep("Count_Cells_F",
+  cols_CPfiltered <- colnames(count_df)[grep("Count_Cells_F",
                                          colnames(count_df))]
-  CP_unfiltered <- colnames(count_df)[grep("unfiltered",
+  cols_CPunfiltered <- colnames(count_df)[grep("unfiltered",
                                            colnames(a))]
   
-  if (count_unfiltered){
+  if (CP_unfiltered){
     
     diff_df <- count_df %>%
-      mutate(diff_filt = CP_unfiltered[2] - CP_unfiltered[1])
+      mutate(diff_filt = !!as.name(cols_CPunfiltered[2]) - 
+               !!as.name(cols_CPunfiltered[1]))
     
   }else{
     
     diff_df <- count_df %>%
-      mutate(diff_filt = CP_filtered[2] - CP_filtered[1])
+      mutate(diff_filt = !!as.name(cols_CPfiltered[2]) - 
+               !!as.name(cols_CPfiltered[1]))
     
   }
   
