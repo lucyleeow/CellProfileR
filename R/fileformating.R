@@ -53,13 +53,6 @@ summarise_PerWell <- function(
                           msg = "Check 'no_images' is single number")
   
   
-  # check if df is a data.table, if not, turn into data.table
-  if (sum (class(df) %in% "data.table") < 1){
-    
-    df <- as.data.table(df)
-    
-  }
-  
   # obtain only count columns
   df_count <- df %>% 
     select(starts_with("Meta"), starts_with("Count")) 
@@ -67,11 +60,6 @@ summarise_PerWell <- function(
   # obtain only median columns
   df_median <- df %>% 
     select(starts_with("Meta"), starts_with("Median")) 
-  
-  
-  # vector of grouping column names
-  grouping_cols <- c("Metadata_PlateID", "Metadata_WellID")
-  
   
   # if data has not been filtered, the number of images (and thus 
   # rows) as 'no_images' for each well/plate grouping
@@ -82,12 +70,12 @@ summarise_PerWell <- function(
                             msg = "Check that the number of rows in 'df' is a multiple of 'no_images'")
     
     # take sum of every 'no_images' rows to get per well data
-    mat_sum <- apply(df_count[3:ncol(df_count),], 2, 
+    mat_sum <- apply(df_count[,3:ncol(df_count)], 2, 
                      function(x) colSums(matrix(x, nrow = no_images)))
     
     
     # take median of every 'no_images' rows to get per well data
-    mat_median <- apply(df_median[3:ncol(df_median),], 2, 
+    mat_median <- apply(df_median[,3:ncol(df_median)], 2, 
                         function(x) colMedians(matrix(x, nrow = no_images)))
     
     
@@ -113,19 +101,28 @@ summarise_PerWell <- function(
     # grouping, use data.table to aggregate and summarise
     # This take MUCH longer than above function 
     
+    # vector of grouping column names
+    grouping_cols <- c("Metadata_PlateID", "Metadata_WellID")
+    
+    # join 2 dfs in list
+    df_list <- list(df_count,df_median)
+    # turn both dfs into data.table
+    df_list <- lapply(df_list, as.data.table)
+    
+ 
     
     # get sum of count columns
-    df_count <- df_count[ , lapply(.SD, 
+    df_count <- df_list[[1]][ , lapply(.SD,
                                    function(x) sum(x, na.rm = TRUE)),
                           by = grouping_cols]
-    
+
     # get median of median columns
-    df_median <- df[ , lapply(.SD, function(x) median(x, na.rm = TRUE)),
+    df_median <- df_list[[2]][ , lapply(.SD, function(x) median(x, na.rm = TRUE)),
                    by = grouping_cols]
-    
-    
+
+
     # as order is preserved, cbind columns together
-    
+
     df_final <- cbind(df_count, df_median[ , 3:ncol(df_median)])
   
   }
