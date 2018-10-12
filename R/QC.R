@@ -343,11 +343,10 @@ table_countImageQC <- function(
   count_df <- df_ImageQCcounts(df_full,df_filtered)
   
   # columns to compare
-  cols_CPfiltered <- colnames(count_df)[grep("Count_Cells_F",
+  cols_CPfiltered <- colnames(count_df)[grep("Count_Cells_F", 
                                              colnames(count_df))]
-  cols_CPunfiltered <- colnames(count_df)[grep("unfiltered",
+  cols_CPunfiltered <- colnames(count_df)[grep("unfiltered", 
                                                colnames(count_df))]
-  
   
   
   
@@ -361,10 +360,9 @@ table_countImageQC <- function(
   }else{
     
     diff_df <- count_df %>%
-      mutate(diff_filt = !!as.name(cols_CPfiltered[2])) 
-             # - 
-             #   !!as.name(cols_CPfiltered[1])) #%>%
-      #select(- !!(as.name(cols_CPunfiltered)))
+      mutate(diff_filt = !!as.name(cols_CPfiltered[2]) - 
+      !!as.name(cols_CPfiltered[1])) %>%
+      select(- !!(as.name(cols_CPunfiltered)))
     
   }
   
