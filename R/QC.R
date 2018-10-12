@@ -368,7 +368,6 @@ table_countImageQC <- function(
   
   return(
   diff_df %>%
-    select(Metadata_PlateID, Metadata_WellID) %>%
     group_by(Metadata_PlateID) %>%
     arrange(desc(diff_filt)) %>%
     head(n=n)
