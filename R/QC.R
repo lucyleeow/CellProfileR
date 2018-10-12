@@ -307,8 +307,11 @@ plot_countImageQC <- function(
               x = "Difference in count before and after image QC")
     )
   
-  
-  return(plots$plots)
+  for (i in 1:length(unique(df$Metadata_PlateID))){
+    
+    print(plots$plots[[i]])
+    
+  }
   
 }
 
@@ -368,7 +371,11 @@ plot_plateheat <- function(
                               limits = c(floor(min), ceiling(max)))
        )
   
-  return(plots$plots)
+  for (i in 1:length(unique(df$Metadata_PlateID))){
+    
+    print(plots$plots[[i]])
+    
+  }
   
 }
 
