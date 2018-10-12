@@ -277,7 +277,7 @@ plot_countImageQC <- function(
   cols_CPfiltered <- colnames(count_df)[grep("Count_Cells_F",
                                          colnames(count_df))]
   cols_CPunfiltered <- colnames(count_df)[grep("unfiltered",
-                                           colnames(a))]
+                                           colnames(count_df))]
   
   if (CP_unfiltered){
     
