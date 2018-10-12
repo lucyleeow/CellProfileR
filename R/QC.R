@@ -278,39 +278,40 @@ plot_countImageQC <- function(
   count_df <- df_ImageQCcounts(df_full,df_filtered)
   
   # columns to compare
-  cols_CPfiltered <- colnames(count_df)[grep("Count_Cells_F",
-                                         colnames(count_df))]
-  cols_CPunfiltered <- colnames(count_df)[grep("unfiltered",
-                                           colnames(count_df))]
+  cols_CPfiltered <- colnames(count_df)[grep("Count_Cells_F", 
+                                             colnames(count_df))]
+  cols_CPunfiltered <- colnames(count_df)[grep("unfiltered", 
+                                               colnames(count_df))]
   
+
   if (CP_unfiltered){
-    
+
     diff_df <- count_df %>%
-      mutate(diff_filt = !!as.name(cols_CPunfiltered[2]) - 
+      mutate(diff_filt = !!as.name(cols_CPunfiltered[2]) -
                !!as.name(cols_CPunfiltered[1]))
-    
+
   }else{
-    
+
     diff_df <- count_df %>%
-      mutate(diff_filt = !!as.name(cols_CPfiltered[2]) - 
+      mutate(diff_filt = !!as.name(cols_CPfiltered[2]) -
                !!as.name(cols_CPfiltered[1]))
-    
+
   }
-  
+
   # make plots
   plots <- diff_df %>%
     group_by(Metadata_PlateID) %>%
     do(plots = ggplot(data = .,
                       aes(x = diff_filt)) +
-         geom_density() + 
+         geom_density() +
          labs(title = .$Metadata_PlateID[1], y = "Density",
               x = "Difference in count before and after image QC")
     )
-  
-  for (i in 1:length(unique(df$Metadata_PlateID))){
-    
+
+  for (i in 1:length(unique(diff_df$Metadata_PlateID))){
+
     print(plots$plots[[i]])
-    
+
   }
   
 }
@@ -321,9 +322,61 @@ plot_countImageQC <- function(
 ############################################################
 
 table_countImageQC <- function(
-  df    # df containing 
-)
+  df_full,                  # df of raw unfiltered data
+  df_filtered,              # df filtered of poor quality images (rows)
+  n = 10,                   # number of rows to show
+  CP_unfiltered = FALSE     # single logical indicating whether count or
+                            # count_unfiltered column (from CP filtering) 
+                            # is to be compared
+){
+  
+  # check inputs
+  assertthat::assert_that(is.logical(CP_unfiltered),
+                          length(CP_unfiltered) == 1,
+                          msg = "Check 'CP_unfiltered' is single logical")
+  
+  assertthat::assert_that(is.numeric(n), length(n)==1,
+                          msg = "Check 'n' is single number")
+  
+  
+  # Use helper function to obtain df of count values
+  count_df <- df_ImageQCcounts(df_full,df_filtered)
+  
+  # columns to compare
+  cols_CPfiltered <- colnames(count_df)[grep("Count_Cells_F",
+                                             colnames(count_df))]
+  cols_CPunfiltered <- colnames(count_df)[grep("unfiltered",
+                                               colnames(count_df))]
+  
+  
+  
+  
+  if (CP_unfiltered){
+    
+    diff_df <- count_df %>%
+      mutate(diff_filt = !!as.name(cols_CPunfiltered[2]) - 
+               !!as.name(cols_CPunfiltered[1])) %>%
+      select(- !!(as.name(cols_CPfiltered)))
+    
+  }else{
+    
+    diff_df <- count_df %>%
+      mutate(diff_filt = !!as.name(cols_CPfiltered[2])) 
+             # - 
+             #   !!as.name(cols_CPfiltered[1])) #%>%
+      #select(- !!(as.name(cols_CPunfiltered)))
+    
+  }
+  
+  return(
+  diff_df %>%
+    select(Metadata_PlateID, Metadata_WellID) %>%
+    group_by(Metadata_PlateID) %>%
+    arrange(desc(diff_filt)) %>%
+    head(n=n)
+  )
 
+}
 
 
 # Plot a feature (column) as plate heatmap for each plate.
