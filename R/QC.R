@@ -15,7 +15,7 @@ library(tidyverse)
 plot_plls <- function(
   df,       # df containing 'ImageQuality_PowerLogLogSlope' column
   channel   # channel of interest, as written in cell profiler 
-  # output, as string
+            # output, as string
 ){
   
   columnName <- paste("ImageQuality_PowerLogLogSlope_Orig",
@@ -34,7 +34,11 @@ plot_plls <- function(
          labs(title = .$Metadata_PlateID[1])
     )
   
-  return(plots$plots)
+  for (i in 1:length(unique(df$Metadata_PlateID))){
+    
+    print(plots$plots[[i]])
+    
+  }
   
 }
 
@@ -307,6 +311,16 @@ plot_countImageQC <- function(
   return(plots$plots)
   
 }
+
+
+# Produce df containing the n largest differences between 
+# count unfiltered and count
+############################################################
+
+table_countImageQC <- function(
+  df    # df containing 
+)
+
 
 
 # Plot a feature (column) as plate heatmap for each plate.
