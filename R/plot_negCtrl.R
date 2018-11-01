@@ -15,7 +15,8 @@
 #' @importFrom assertthat assert_that
 #' @importFrom magrittr %>%
 #' @import ggplot2
-
+#' 
+#' @export
 plot_negCtrl <- function(df, feature, annot, neg_ctrl){
   
   # check inputs
