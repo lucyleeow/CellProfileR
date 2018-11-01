@@ -164,7 +164,7 @@ plot_countfilt <- function(
 }
 
 
-table_countfilt <- function(
+df_countfilt <- function(
   df,      # df of raw data
   n = 10   # number of rows to show
 ){
@@ -321,7 +321,7 @@ plot_countImageQC <- function(
 # count unfiltered and count
 ############################################################
 
-table_countImageQC <- function(
+df_countImageQC <- function(
   df_full,                  # df of raw unfiltered data
   df_filtered,              # df filtered of poor quality images (rows)
   n = 10,                   # number of rows to show
