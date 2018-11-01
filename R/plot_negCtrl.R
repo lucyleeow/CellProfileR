@@ -31,7 +31,7 @@ plot_negCtrl <- function(df, feature, annot, neg_ctrl){
   assert_that(sum(feature %in% colnames(df)) == 1,
               msg = "Check that your 'feature' is a column that exists in 'df'")
   
-  assert_that(sum("Metadata_PlateID" %in% df) == 1,
+  assert_that(sum("Metadata_PlateID" %in% colnames(df)) == 1,
               msg = "Check that there is a column called 'Metadata_PlateID' in your 'df'")
   
   assert_that(sum(annot %in% colnames(df)) == 1,
@@ -45,10 +45,12 @@ plot_negCtrl <- function(df, feature, annot, neg_ctrl){
   title <- paste("Distribution of ", feature, " in negative controls", 
                  sep = "")
   
+  return(
   df[df[,annot] == neg_ctrl,] %>%
     ggplot(aes_string(y = feature, x = "Metadata_PlateID")) + 
     geom_boxplot() + 
-    labs(title = title)
+    labs(title = title) +
     coord_flip()
+  )
     
 }
