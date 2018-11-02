@@ -31,16 +31,18 @@ filter_NA <- function(df, NA_cutoff){
   
   if (missing(NA_cutoff)){
     
-    print(paste("There were ", sum(col_NAs > 0), " columns with >0 NA's and all will be removed"))
+    filter_cols <- colnames(df)[col_NAs < NA_cutoff]
+    cat("The columns:\n", filter_cols, "will be removed")
     
+
     # filter columns
     df <- df[,col_NAs == 0]
     
   } else {
     
-  filter_num <- sum(col_NAs < NA_cutoff)
-
-  print(paste("There were ", filter_num, " columns with >", NA_cutoff, " NAs and these will be removed", sep = ""))
+  filter_cols <- colnames(df)[col_NAs < NA_cutoff]
+  cat("The columns:\n", filter_cols, "will be removed")
+  
   
   # filter columns
   df <- df[,col_NAs > NA_cutoff]
@@ -51,10 +53,13 @@ filter_NA <- function(df, NA_cutoff){
   
 }
 
-
 #' @describeIn filter_NA
 #' @export
 filter_lowVar <- function(df){
   
   
 }
+
+
+c <- c("ff","ffff","f3f")
+message("there",c)
