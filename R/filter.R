@@ -7,7 +7,12 @@
 #'     filtered.
 #'
 #' @param df Dataframe of Cell Profiler data.
-#' @param NA_cutoff 
+#' @param NA_cutoff Columns with a total number of NAs or NaNs greater than
+#'     the NA_cutoff number will be removed.
+#' @param freqCut Passed to caret::nearZeroVar. The cutoff for the ratio of the
+#'     most common value to the second most common value.
+#' @param uniqueCut Passed to caret::nearZeroVar. The cutoff for the percentage
+#'     of distinct values out of the number of total samples.
 #' 
 #' @importFrom assertthat assert_that
 #'
@@ -64,10 +69,10 @@ filter_lowVar <- function(df, freqCut = 95/5, uniqueCut = 10){
   } else {
     
     filter_cols <- colnames(df)[to_filter]
-    cat("The columns:\n", filter_cols, "were removed")
+    cat("The columns:\n", filter_cols, "\n\nwere removed")
     
     # filter df
-    df <- df[,-filter_cols]
+    df <- df[,-to_filter]
     
   }
   
