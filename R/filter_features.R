@@ -1,11 +1,13 @@
 #' Filter features
 #' 
-#' Filters features (columns) of Cell Profiler data to exclude any columns 
-#' with >1 NA/NaN or low variance.
+#' Filters columns (features) of Cell Profiler data to exclude any columns 
+#' with NA/NaNs, low variance or are highly correlated.
 #' 
-#' @return A dataframe in the same format as the input df but with columns
-#'     filtered.
-#'
+#' @return A dataframe with the filtered columns removed. If out_cols is set
+#'     to TRUE, a list of 2, where the 1st element is the filtered dataframe
+#'     and the 2nd element is a vector of the filtered column names.
+#'  
+#'  
 #' @param df Dataframe of Cell Profiler data to be filtered.
 #' @param out_cols Single logical indicating whether the filtered column names
 #'     should be output as well.
@@ -17,16 +19,11 @@
 #'     percentage of distinct values out of the number of total samples.
 #' 
 #' 
-#' @return A dataframe with the filtered columns removed. If out_cols is set
-#'     to TRUE, a list of 2, where the 1st element is the filtered dataframe
-#'     and the 2nd element is a vector of the filtered column names.
-#' 
-#' 
 #' @importFrom assertthat assert_that
 #' @importFrom magrittr %>%
 #'
-#' @describeIn filter_NA Filters columns with total number of NA's > 0 or above
-#'     a certain number if 'NA_cutoff' given.
+#' @describeIn filter_NA Filters columns with any NA/NaN's or a total number 
+#'     above a certain number if 'NA_cutoff' given.
 #' @export
 filter_NA <- function(df, NA_cutoff, out_cols = FALSE){
 
@@ -38,6 +35,7 @@ filter_NA <- function(df, NA_cutoff, out_cols = FALSE){
   
   assert_that(is.logical(out_cols), length(out_cols) == 1,
               msg = "Check 'out_cols' is a single logical")
+  
   
   # calculate total NAs for each column
   col_NAs <- apply(df, 2, function(x) sum(is.na(x)))
@@ -77,17 +75,27 @@ filter_NA <- function(df, NA_cutoff, out_cols = FALSE){
   
 }
 
-#' @describeIn filter_NA Filters columns with low variance (e.g. entire column
-#'     consists of the same value) using the caret::nearZeroVar function.
+#' @describeIn filter_NA Filters columns with low variance (e.g. if entire 
+#'     column consists of the same value) using the \code{caret::nearZeroVar} 
+#'     function. See 
+#'     \href{https://cran.r-project.org/web/packages/caret/caret.pdf}{caret 
+#'     documentation} for details on this function.
 #' @export
 filter_lowVar <- function(df, freqCut = 95/5, uniqueCut = 10, 
-                          out_cols = FALSE){
+                          out_cols = FALSE) {
   
   # check inputs
   assert_that(is.logical(out_cols), length(out_cols) == 1,
               msg = "Check 'out_cols' is a single logical")
   
-  # filter
+  assert_that(is.numeric(freqCut), length(freqCut) == 1,
+              msg = "Check 'freqCut' is a single number")
+  
+  assert_that(is.numeric(uniqueCut), length(uniqueCut) == 1,
+              msg = "Check 'uniqueCut' is a single number")
+  
+  
+  # indicies of columns to filter
   to_filter <- caret::nearZeroVar(df, freqCut, uniqueCut)
   
   if (length(to_filter) == 0) {
@@ -97,7 +105,7 @@ filter_lowVar <- function(df, freqCut = 95/5, uniqueCut = 10,
   } else {
     
     filter_cols <- colnames(df)[to_filter]
-    cat("There were", length(filter_cols), "columns removed")
+    cat("There were", length(filter_cols), "column(s) removed")
     
     # filter df
     df <- df[,-to_filter]
@@ -155,7 +163,7 @@ filter_cor <- function(df, cor_cutoff, out_cols = FALSE) {
   
   # inform user which columns have been removed
   filter_cols <- colnames(mat)[remove_cols]
-  cat("There were", length(filter_cols), "columns removed")
+  cat("There were", length(filter_cols), "column(s) removed")
   
   if (out_cols) {
     
