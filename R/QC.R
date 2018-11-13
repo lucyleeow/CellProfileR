@@ -1,72 +1,41 @@
-##############################################################
-# Functions for performing QC steps on data from Cell Profiler
-#
-# Author: Lucy Liu
-##############################################################
+#' Filter images
+#' 
+#' Filter poor quality images (using the powerloglog slope feature) and 
+#' 
+#' 
+#' @param df Dataframe of raw Cell Profiler data, where each row is 1 image
+#'     NOT one well.
+#' @param no_IQR Number of IQR's below the 25% quantile to place cutoff 
+#'     threshold.
+#' 
+#' @importFrom assertthat assert_that
+#' @importFrom magrittr %>%
+#' 
+#' 
 
-library(platetools)
-library(data.table)
-library(tidyverse)
-
-# Plot density plots of the 'ImageQuality_PowerLogLogSlope - '
-# values (for a selected channel) for each plate
-##############################################################
-
-plot_plls <- function(
-  df,       # df containing 'ImageQuality_PowerLogLogSlope' column
-  channel   # channel of interest, as written in cell profiler 
-            # output, as string
-){
-  
-  columnName <- paste("ImageQuality_PowerLogLogSlope_Orig",
-                      channel, sep = "")
+#' @describeIn filterImages Filter images (rows) with a powerloglog slope 
+#'     value below the threshold ('no_IQR' * IQR below the 25th percentile) in 
+#'     ANY channel.
+#' @export
+filterImages <- function(df, no_IQR) {
   
   # check inputs
-  assertthat::assert_that(columnName %in% colnames(df),
-                          msg = "Make sure channel exists and is spelt correctly")
+  assert_that(is.numeric(no_IQR), length(no_IQR) == 1, 
+              msg = "Check 'no_IQR' is a single number")
   
-  # make plots
-  plots <- df %>%
-    group_by(Metadata_PlateID) %>%
-    do(plots = ggplot(data = ., 
-                      aes_string(x = columnName)) + 
-         geom_density() +
-         labs(title = .$Metadata_PlateID[1])
-    )
-  
-  for (i in 1:length(unique(df$Metadata_PlateID))){
-    
-    print(plots$plots[[i]])
-    
-  }
-  
-}
-
-
-# Remove images that have low PowerLogLogSlope value
-######################################################
-
-filterImages <- function(
-  df,         # raw df (each row is 1 image, NOT 1 well)
-  no_IQR      # number of IQR's below the 25% quantile to place cutoff threshold
-){
-  
-  # check no_IQR argument
-  assertthat::assert_that(is.numeric(no_IQR),
-                          length(no_IQR) == 1, 
-                          msg = "Check 'no_IQR' is a single number")
-  
-  # get column names of the powerloglog of all channels
+  ## get column names of the powerloglog of all channels
   plls_columns <- colnames(
     df %>%
-      select(starts_with("ImageQuality_PowerLogLogSlope_Orig"))
+      dplyr::select(dplyr::starts_with("ImageQuality_PowerLogLogSlope_Orig"))
   )
   
-  # check powerloglog column(s) exist 
-  assertthat::assert_that(length(plls_columns) > 0,
-                          msg = "Check df has a 'ImageQuality_PowerLogLogSlope_Orig' column")
+  ## check powerloglog column(s) exist 
+  assert_that(length(plls_columns) > 0,
+              msg = "Check that there is at least one 'ImageQuality_PowerLogLogSlope_Orig' 
+              column in 'df'")
   
   
+  # thresholding function
   threshold_fun <- function(group_df){
     
     # obtain only columns of interest
@@ -105,7 +74,7 @@ filterImages <- function(
   
   return(
     df %>%
-      group_by(Metadata_PlateID) %>%
+      dplyr::group_by(Metadata_Barcode) %>%
       do(threshold_fun(.))
   )
   
@@ -133,9 +102,9 @@ plot_filtered <- function(
   
   # make plot
   df %>%
-    group_by(Metadata_PlateID) %>%
+    group_by(Metadata_Barcode) %>%
     do(no_images * wells  - count(.)) %>%
-    ggplot(aes(y=n, x=Metadata_PlateID)) +
+    ggplot(aes(y=n, x=Metadata_Barcode)) +
     geom_bar(stat = "identity") +
     labs(title = "Number of images filtered", y = "Number of images",
          x = "Plate") + 
@@ -217,7 +186,7 @@ df_ImageQCcounts <- function(
   # group by plate & well and sum counts
   
   ## vector of grouping column names
-  grouping_cols <- c("Metadata_PlateID", "Metadata_WellID")
+  grouping_cols <- c("Metadata_Barcode", "Metadata_WellID")
   
   grouping_fun <- function(df){
     
@@ -243,7 +212,7 @@ df_ImageQCcounts <- function(
   
   # reshape into wide form
   reshaped_df <- dcast(bound_df, 
-                    Metadata_PlateID + Metadata_WellID ~ Type,
+                    Metadata_Barcode + Metadata_WellID ~ Type,
                     value.var = c("Count_Cells", 
                                   "Count_Cells_unfiltered"))
   # 
@@ -300,15 +269,15 @@ plot_countImageQC <- function(
 
   # make plots
   plots <- diff_df %>%
-    group_by(Metadata_PlateID) %>%
+    group_by(Metadata_Barcode) %>%
     do(plots = ggplot(data = .,
                       aes(x = diff_filt)) +
          geom_density() +
-         labs(title = .$Metadata_PlateID[1], y = "Density",
+         labs(title = .$Metadata_Barcode[1], y = "Density",
               x = "Difference in count before and after image QC")
     )
 
-  for (i in 1:length(unique(diff_df$Metadata_PlateID))){
+  for (i in 1:length(unique(diff_df$Metadata_Barcode))){
 
     print(plots$plots[[i]])
 
@@ -368,7 +337,7 @@ df_countImageQC <- function(
   
   return(
   diff_df %>%
-    group_by(Metadata_PlateID) %>%
+    group_by(Metadata_Barcode) %>%
     arrange(desc(diff_filt)) %>%
     head(n=n)
   )
@@ -411,17 +380,17 @@ plot_plateheat <- function(
   
   # make plots
   plots <- df %>%
-    group_by(Metadata_PlateID) %>%
+    group_by(Metadata_Barcode) %>%
     do(plots = raw_map(data = .[,column_full],
                        well = .$Metadata_WellID,
                        plate = plate) + 
-         ggtitle(.$Metadata_PlateID[1]) +
+         ggtitle(.$Metadata_Barcode[1]) +
          scale_fill_gradient2(low = "blue", mid = "white",
                               high = "red", midpoint = med,
                               limits = c(floor(min), ceiling(max)))
        )
   
-  for (i in 1:length(unique(df$Metadata_PlateID))){
+  for (i in 1:length(unique(df$Metadata_Barcode))){
     
     print(plots$plots[[i]])
     
