@@ -27,7 +27,7 @@ plot_plls <- function(df, channel) {
   # make plots
   plots <- df %>%
     dplyr::group_by(Metadata_Barcode) %>%
-    do(plots = ggplot(data = ., 
+    dplyr::do(plots = ggplot(data = ., 
                       aes_string(x = columnName)) + 
          geom_density() +
          labs(title = .$Metadata_Barcode[1])
