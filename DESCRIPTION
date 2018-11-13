@@ -15,5 +15,6 @@ Imports:
     data.table,
     dplyr,
     ggplot2,
-    platetools
-    
+    platetools,
+    robustbase
+RoxygenNote: 6.1.0
