@@ -97,7 +97,7 @@ filter_lowVar <- function(df, freqCut = 95/5, uniqueCut = 10,
   } else {
     
     filter_cols <- colnames(df)[to_filter]
-    cat("There were", length(filter_cols), "removed")
+    cat("There were", length(filter_cols), "columns removed")
     
     # filter df
     df <- df[,-to_filter]
