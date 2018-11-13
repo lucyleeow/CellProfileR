@@ -57,7 +57,7 @@ summarise_PerWell <- function(df, no_images, filtered = FALSE) {
     
     # get metadata rows, 1 for each well
     df_meta <- df %>%
-      dplyr::select(Metadata_PlateID, Metadata_WellID)
+      dplyr::select(Metadata_Barcode, Metadata_WellID)
     
     nrow <- dim(df)[1]
     repeats <- nrow/no_images
@@ -78,7 +78,7 @@ summarise_PerWell <- function(df, no_images, filtered = FALSE) {
     # This take MUCH longer than above function 
     
     # vector of grouping column names
-    grouping_cols <- c("Metadata_PlateID", "Metadata_WellID")
+    grouping_cols <- c("Metadata_Barcode", "Metadata_WellID")
     
     # join 2 dfs in list
     df_list <- list(df_count,df_median)
