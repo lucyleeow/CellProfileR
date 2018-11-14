@@ -7,7 +7,7 @@
 #'     well.
 #' 
 #' @param df Dataframe of raw (per image) Cell Profiler data.
-#' @param no_images The number of images taken per well.
+#' @param num_images The number of images taken per well.
 #' @param filtered Single logical indicated whether poor quality images have 
 #'     been filtered (thus the number of images per well is variable).
 #' 
@@ -18,14 +18,14 @@
 #' 
 
 #' @export
-summarise_PerWell <- function(df, no_images, filtered = FALSE) {
+summarise_PerWell <- function(df, num_images, filtered = FALSE) {
   
   # check inputs
   assert_that(is.logical(filtered), length(filtered) == 1, 
               msg = "Check that 'filtered' is a single logical")
   
-  assert_that(is.numeric(no_images), length(no_images) == 1, 
-              msg = "Check 'no_images' is single number")
+  assert_that(is.numeric(num_images), length(num_images) == 1, 
+              msg = "Check 'num_images' is single number")
   
   
   # obtain only count columns
@@ -37,22 +37,22 @@ summarise_PerWell <- function(df, no_images, filtered = FALSE) {
     dplyr::select(dplyr::starts_with("Meta"), dplyr::starts_with("Median")) 
   
   # if data has not been filtered, the number of images (and thus 
-  # rows) as 'no_images' for each well/plate grouping
+  # rows) as 'num_images' for each well/plate grouping
   
   if (! filtered){
     
-    assert_that(dim(df)[1] %% no_images == 0, 
+    assert_that(dim(df)[1] %% num_images == 0, 
                 msg = "Check that there are the same number of images for each well")
     
-    # take sum of every 'no_images' rows to get per well data
+    # take sum of every 'num_images' rows to get per well data
     mat_sum <- apply(df_count[,3:ncol(df_count)], 2, 
-                     function(x) colSums(matrix(x, nrow = no_images)))
+                     function(x) colSums(matrix(x, nrow = num_images)))
     
     
-    # take median of every 'no_images' rows to get per well data
+    # take median of every 'num_images' rows to get per well data
     mat_median <- apply(df_median[,3:ncol(df_median)], 2, 
                         function(x) robustbase::colMedians(
-                          matrix(x, nrow = no_images)))
+                          matrix(x, nrow = num_images)))
     
     
     # get metadata rows, 1 for each well
@@ -60,9 +60,9 @@ summarise_PerWell <- function(df, no_images, filtered = FALSE) {
       dplyr::select(Metadata_Barcode, Metadata_WellID)
     
     nrow <- dim(df)[1]
-    repeats <- nrow/no_images
+    repeats <- nrow/num_images
     
-    df_meta <- df_meta[ rep(c(TRUE, rep(FALSE, no_images - 1)), 
+    df_meta <- df_meta[ rep(c(TRUE, rep(FALSE, num_images - 1)), 
                             repeats), ]
     
     
