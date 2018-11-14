@@ -23,6 +23,7 @@
 #' 
 #' @importFrom assertthat assert_that
 #' @importFrom magrittr %>%
+#' @import ggplot2
 #' 
 
 #' @describeIn filterImages Filter images (rows) with a powerloglog slope 
