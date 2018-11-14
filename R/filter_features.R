@@ -22,6 +22,7 @@
 #' @importFrom assertthat assert_that
 #' @importFrom magrittr %>%
 #'
+
 #' @describeIn filter_NA Filters columns with any NA/NaN's or a total number 
 #'     above a certain number if 'NA_cutoff' given.
 #' @export
