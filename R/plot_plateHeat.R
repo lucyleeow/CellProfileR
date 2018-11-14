@@ -1,32 +1,46 @@
+#' Plot plate heatmaps
+#' 
+#' Plot a feature (column) as a plate heatmap for each plate. Scale is uniform
+#' across all plates, such that the max value = red, min value = blue and 
+#' median value = white.
+#' 
+#' @param df_PW Dataframe of per well Cell Profiler data.
+#' @param column Name of the column (feature) to plot, as string. Matching
+#'     for column name will be doing using grep but enough of the column name
+#'     must be given to identify a single column in the dataframe.
+#' @param plate Number of wells in a plate.
+#' 
+#' @importFrom assertthat assert_that
+#' @importFrom magrittr %>%
+#' @import ggplot2
+#' 
 
-
-# Plot a feature (column) as plate heatmap for each plate.
-# Scale is uniform across all plates
-############################################################
-
-plot_plateHeat <- function(
-  df,          # df of per well data
-  column,      # approximate column name of feature of interest as string 
-  # matching will be done with grep
-  plate = 384  # number of wells in plate
-){
+#' @export
+plot_plateHeat <- function(df_PW, column, plate = 384) {
   
   # check inputs
-  assertthat::assert_that(is.character(column),
-                          length(column) == 1,
-                          msg = "Check that 'column' is single character")
+  assert_that(is.character(column),length(column) == 1, 
+              msg = "Check that 'column' is single string")
   
   
   # grep for column name
   grep_pattern <- paste(column, "$", sep = "")
-  column_full <- colnames(df)[grep(grep_pattern, colnames(df))]
+  column_name <- colnames(df_PW)[grep(grep_pattern, colnames(df_PW))]
   
-  assertthat::assert_that(length(column_full) == 1,
-                          msg = "Did not find single column when matching with 'column'. Try different 'column' string")
+  assert_that(length(column_name) < 1,
+              msg = "Did not find a column matching your given 'column' string")
   
+  assert_that(length(column_name) > 1,
+              msg = "Found >1 columns matching your given 'column' string")
+  
+  
+  # make sure df_PW is a data.table
+  if (! "data.table" %in% class(df_PW)) {
+    df_PW <- data.table::as.data.table(df_PW)
+  }
   
   # find med, max and min to set common gradient scale
-  feature_vect <- df[ , get(column_full)]
+  feature_vect <- df_PW[ , get(column_name)]
   
   med <- median(feature_vect)
   max <- max(feature_vect)
@@ -34,18 +48,18 @@ plot_plateHeat <- function(
   
   
   # make plots
-  plots <- df %>%
-    group_by(Metadata_Barcode) %>%
-    do(plots = raw_map(data = .[,column_full],
-                       well = .$Metadata_WellID,
-                       plate = plate) + 
-         ggtitle(.$Metadata_Barcode[1]) +
-         scale_fill_gradient2(low = "blue", mid = "white",
-                              high = "red", midpoint = med,
-                              limits = c(floor(min), ceiling(max)))
+  plots <- df_PW %>%
+    dplyr::group_by(Metadata_Barcode) %>%
+    dplyr::do(plots = platetools::raw_map(data = .[,column_name],
+                                          well = .$Metadata_WellID,
+                                          plate = plate) + 
+                ggtitle(.$Metadata_Barcode[1]) +
+                scale_fill_gradient2(low = "blue", mid = "white",
+                                     high = "red", midpoint = med,
+                                     limits = c(floor(min), ceiling(max)))
     )
   
-  for (i in 1:length(unique(df$Metadata_Barcode))){
+  for (i in 1:length(unique(df_PW$Metadata_Barcode))){
     
     print(plots$plots[[i]])
     
