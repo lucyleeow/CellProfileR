@@ -98,11 +98,11 @@ filterImages <- function(df, num_IQR) {
 plotFiltered <- function(filtered_df, num_images, wells = 384) {
   
   # check inputs
-  assertthat::assert_that(is.numeric(num_images), length(num_images) == 1,
-                          msg = "Check 'num_images' is single number")
+  assert_that(is.numeric(num_images), length(num_images) == 1,
+              msg = "Check 'num_images' is single number")
   
-  assertthat::assert_that(is.numeric(wells), length(wells) == 1,
-                          msg = "Check 'wells' is single number")
+  assert_that(is.numeric(wells), length(wells) == 1,
+              msg = "Check 'wells' is single number")
   
   
   # make plot
