@@ -26,7 +26,7 @@ readALL <- function(paths, sep = ",") {
   all_files <- unlist(sapply(paths, list.files))
 
   # read and combine
-  data_raw <- data.table::rbindlist(lapply(fullpath, 
+  data_raw <- data.table::rbindlist(lapply(all_files, 
                                            function(x) 
                                              data.table::fread(x, sep = ",", 
                                                                header = TRUE)), 
