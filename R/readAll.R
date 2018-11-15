@@ -23,7 +23,8 @@ readALL <- function(paths, sep = ",") {
   
   
   # list all files in paths
-  all_files <- unlist(sapply(paths, list.files))
+  all_files <- unlist(sapply(paths, function(x) list.files(x, 
+                                                           full.names = TRUE))
 
   # read and combine
   data_raw <- data.table::rbindlist(lapply(all_files, 
