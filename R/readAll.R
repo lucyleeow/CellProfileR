@@ -5,7 +5,7 @@
 #' 
 #' @param paths Character vector of folder paths the Cell Profiler data is in.
 #'     Function will use \code{list.files} on each folder path and read in
-#'     all files in each folder.
+#'     all files in each folder. Paths should NOT have a trailing "/".
 #' @param sep The field separator character. Values on each line of the file 
 #'     are separated by this character.
 #' 
