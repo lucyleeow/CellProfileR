@@ -71,7 +71,7 @@ summarise_PerWell <- function(df, num_images, filtered = FALSE) {
     
     df_final <- cbind(df_meta, as.data.frame(full_mat))
     
-  }else{
+  } else {
     
     # when number of rows are not consistent for each plate/well
     # grouping, use data.table to aggregate and summarise
