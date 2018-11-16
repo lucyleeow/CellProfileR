@@ -27,10 +27,10 @@ plot_plateHeat <- function(df_PW, column, plate = 384) {
   grep_pattern <- paste(column, "$", sep = "")
   column_name <- colnames(df_PW)[grep(grep_pattern, colnames(df_PW))]
   
-  assert_that(!length(column_name) == 0,
+  assert_that(! length(column_name) == 0,
               msg = "Did not find a column matching your given 'column' string")
   
-  assert_that(length(column_name) > 1,
+  assert_that(! length(column_name) > 1,
               msg = "Found >1 columns matching your given 'column' string")
   
   
