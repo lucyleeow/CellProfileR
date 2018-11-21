@@ -56,7 +56,7 @@
 #' @param allbyall Logical indicating whether to do all treatment-treatment
 #'     comparisons (TRUE) or only treatment-control comparisons.
 #' @param dirprefix Path to the directory to store results in, as string. 
-#'     Include '/' at the end. This path must already exist.
+#'     This path will be created if it does not already exist.
 #' @param outfile Name of the file to save all the mp-values, as string.
 #' @param loadingsout Logical indicating whether the PCA loadings should be
 #'     output.
@@ -69,10 +69,64 @@
 # 		 These occur when the gamma distribution parameters are being
 # 		 derived and are generally not a problem.
 #' 
+#' @importFrom assertthat assert_that
 #' 
 
 #' @export
-mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls, dirprefix="/var/www/html/mpvalue/results/", outfile="all_mp-values.txt", allbyall=FALSE, loadingsout=FALSE, pcaout=FALSE, gammaout=FALSE) {
+mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls, 
+                    allbyall=FALSE, dirprefix, outfile="all_mp-values.txt",  
+                    loadingsout=FALSE, pcaout=FALSE, gammaout=FALSE) {
+  
+  # check inputs
+  assert_that(is.data.frame(dataset), 
+              msg = "Check that 'dataset' is a dataframe") #LL
+  
+  assert_that(is.numeric(datacols), 
+              msg = "Check that 'datacols' is a numeric vector")
+
+  
+  ## character inputs
+  character_args <- list(txlabels = txlabels, batchlabels = batchlabels, 
+                         negctrls = negctrls, dirprefix= dirprefix,
+                         outfile = outfile)
+  
+  for (i in 1:length(character_args)){
+    
+    msg <- paste("Check that '", names(character_args)[i], 
+                 "' is a single string",
+                 sep = "")
+    
+    assert_that(is.character(character_args[[i]]), 
+                length(character_args[[i]]) == 1,
+                msg = msg)
+    
+  }
+  
+  ## create path
+  if (! dir.exists(dirprefix)) {
+    
+    a <- dir.create(dirprefix, recursive = TRUE)
+    
+  }
+  
+  ## check dir.create worked
+  assert_that(a, msg = "Could not create your 'dirprefix', check path given")
+  
+  ## logical inputs
+  logical_args <- list(allbyall = allbyall, loadingsout = loadingsout, 
+                       pcaout = pcaout, gammaout = gammaout)
+  
+  for (i in 1:length(logical_args)){
+    
+    msg <- paste("Check that '", names(logical_args)[i], "' is a single logical",
+                 sep = "")
+    
+    assert_that(is.logical(logical_args[[i]]), length(logical_args[[i]]) == 1,
+                msg = msg)
+    
+  }
+
+  
   # Standardizing variable names
   dataset$batch <- as.character(dataset[,names(dataset) %in% batchlabels]);
   dataset$tx <- as.character(dataset[,names(dataset) %in% txlabels]);
