@@ -173,35 +173,71 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
 .batchtotx <- function(fulldata) {
   
   if (allbyall) {
+  # here we want to compare all pairwise tx's/conditions
+    
     alltx <- unique(fulldata$tx);
     currbatch <- unique(fulldata$batch);
+    
+    
     for (i in 1:(length(alltx)-1)) {
       negctrls <- alltx[i];
+      #LL take the first tx as 'negctrls', as we are comparing all pairwise tx's
       numcomps <- length(alltx) - i;
-      cat("running all", numcomps, "comparisons to treatment", negctrls, "in batch", currbatch, fill=TRUE);
-      ncdf <- fulldata[fulldata$tx %in% negctrls,];
-      tempfulldata <- fulldata[fulldata$tx %in% alltx[i+1:length(alltx)],];
-      tempmpvalues <- dlply(tempfulldata, .(tx), .txtomp, ncdf=ncdf, negctrls=negctrls);
-      tempmpvalues <- ldply(tempmpvalues, data.frame);
-      if (i %in% "1") {
+      #LL compare the tx above to all subsequent unique tx'es, thus the formula 
+      # for number of comparisons
+      
+      cat("running all", numcomps, "comparisons to treatment", negctrls, 
+          "in batch", currbatch, fill=TRUE);
+      
+      ncdf <- fulldata[fulldata$tx == negctrls,]; #LL
+      #LL 'negative control df'. Subset only the rows where tx is the ith tx 
+      # i.e. our 'negctrls'
+      
+      comparisontx_data <- fulldata[fulldata$tx %in% alltx[i+1:length(alltx)],];
+      #LL data of all the tx's to compare the to 'ith' tx ('negctrl') to 
+      # i.e. all unique tx's after the ith tx.
+      
+      tempmpvalues <- plyr::dlply(comparisontx_data, .(tx), .txtomp, ncdf=ncdf, 
+                            negctrls=negctrls);
+      #LL input: df, output: list. Group by the tx column, perform the function
+      # .txtomp, with the 'ncdf' and 'negctrls' arguments as given 
+      
+      tempmpvalues <- plyr::ldply(tempmpvalues, data.frame);
+      #LL create a dataframe???
+      
+      
+      if (i == 1) { #LL
         allmpvalues <- tempmpvalues;
+        #LL for the first loop - store the mp values
       }
       else {
         allmpvalues <- rbind(allmpvalues, tempmpvalues);
+        #LL growing df of successive mp-values for other comparisons
       }
-    }
-  }
-  else {
-    ncdf <- fulldata[fulldata$tx %in% negctrls,];
+    } # end of for loop
+  } else { #LL if NOT allbyall
+    
+    ncdf <- fulldata[fulldata$tx == negctrls,];
+    #LL negative control df, 'negctrls' here is the one input by the user 
+    
     fulldata <- fulldata[!fulldata$tx %in% negctrls,];
-    allmpvalues <- dlply(fulldata, .(tx), .txtomp, ncdf=ncdf, negctrls=negctrls);
-    allmpvalues <- ldply(allmpvalues, data.frame);
+    #LL all NOT negctrls rows
+    
+    allmpvalues <- plyr::dlply(fulldata, .(tx), .txtomp, ncdf=ncdf, 
+                         negctrls=negctrls);
+    #LL group by tx, apply function .txtomp to every group. Arguments to .txtomp
+    # ncdf and negctrls as given 
+    allmpvalues <- plyr::ldply(allmpvalues, data.frame);
+    
   }
   if (gammaout) {
-    names(allmpvalues) <- c("tx", "compared to", "Mahalanobis", "mp-value", "rate", "shape", "gamma p-value", "gamma fit p-value");
-  }
-  else {
-    names(allmpvalues) <- c("tx", "compared to", "Mahalanobis", "mp-value"); 
+    colnames(allmpvalues) <- c("tx", "compared to", "Mahalanobis", "mp-value", 
+                            "rate", "shape", "gamma p-value", 
+                            "gamma fit p-value");
+  } else {
+    colnames(allmpvalues) <- c("tx", "compared to", "Mahalanobis", "mp-value"); 
+    #LL remaining columns will be named 'NA' (as there are more columns in the 
+    # df than the length of the given vector given)
   }
   return(allmpvalues);
 }  ## END FUNCTION .batchtotx
