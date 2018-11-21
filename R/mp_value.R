@@ -512,15 +512,24 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
 #' @keywords internal
 checkdata <- function(x) {
   baddata <- FALSE;
-  numtx <- length(table(dimnames(x)[[1]]));
-  if (class(x) %in% "numeric") { baddata <- TRUE; }
-  else if (nrow(x) < 3 | ncol(x) < 2  | numtx < 2) { baddata <- TRUE; }
+  numtx <- length(unique(rownames(x))); #LL
+  
+  if (! class(x) %in% "matrix") { #LL
+    baddata <- TRUE; 
+  } else if (nrow(x) < 3 | ncol(x) < 2  | numtx < 2) {
+    #LL req at least 3 samples (nrow), at least 2 features, and at least 2 
+    # conditison (incl negcontrol) 
+      baddata <- TRUE; 
+  }
+  
   if (baddata) {
     if (gammaout) {
-      y <- (matrix(c(unique(negctrls), 0, NA, NA, NA, NA, NA), 1, 7));
+      y <- (matrix(c(unique(negctrls), 0, NA, NA, NA, NA, NA), 
+                   1, 7));
     }
     else {
-      y <- (matrix(c(unique(negctrls), 0, NA), 1, 3));
+      y <- (matrix(c(unique(negctrls), 0, NA), 
+                   1, 3));
     }
   }
   else {
