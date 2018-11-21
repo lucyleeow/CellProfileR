@@ -28,7 +28,10 @@
 # Example: -------------------------------------------------------------------------------------
 # This example uses the well-known 'iris' dataset in R.
 # > iris$batch <- rep(1, nrow(iris));
-# > mpvalue(iris, txlabels="Species", batchlabels="batch", datacols=c(1:4), negctrls="setosa", dirprefix="irisresults/", allbyall=TRUE, outfile="iris_mpvalues.txt", loadingsout=TRUE, pcaout=TRUE, gammaout=TRUE);
+# > mpvalue(iris, txlabels="Species", batchlabels="batch", datacols=c(1:4), 
+#           negctrls="setosa", dirprefix="irisresults/", allbyall=TRUE, 
+#           outfile="iris_mpvalues.txt", loadingsout=TRUE, pcaout=TRUE, 
+#           gammaout=TRUE);
 #
 # The results from iris_mpvalues.txt (spacing adjusted and decimals truncated):
 # batch	tx		compared.to	Mahalanobis	mp.value 	rate 	shape	gamma.p.value	gamma.fit.p.value
@@ -146,7 +149,8 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
       cat("All batches contain at least 1 negative control.", fill=TRUE);
     }
     else {
-      cat("The following batches do not contain negative controls and will be removed:", badbatches, fill=TRUE);
+      cat("The following batches do not contain negative controls and will be removed:", 
+          badbatches, fill=TRUE);
     }
     dataset <- dataset[dataset$batch %in% goodbatches,];
   }
@@ -156,7 +160,8 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   finalmpvalues <- dlply(dataset, .(batch), .batchtotx);
   finalmpvalues <- ldply(finalmpvalues, data.frame);
   cat("Writing output file\n");
-  write.table(finalmpvalues, file=outfile, append=FALSE, sep="\t", row.names=FALSE, col.names=TRUE, quote=FALSE);
+  write.table(finalmpvalues, file=outfile, append=FALSE, sep="\t", 
+              row.names=FALSE, col.names=TRUE, quote=FALSE);
   
 }  ## END FUNCTION mpvalue
 
@@ -346,10 +351,14 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   if (length(checkres) > 1) {
     return(checkres);
   }
-  
+  #LL if data incorrect size, return single row
   
   justdata <- justdata[order(rownames(justdata)),];
+  
   txpca <- prcomp(justdata, center=TRUE, scale. = TRUE);
+  # LL perform PCA, returns list with: sd of the PC's square roots of the 
+  # eigenvalues, matrix of variable loadings (columns are eigenvectors)
+  
   
   # Extract PCA loadings
   loads <- txpca$rotation;
@@ -357,19 +366,31 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   # Determine the number of PCs explaining 90% of the
   # total variation and keep only those PCs
   cumpct <- cumsum((txpca$sdev)^2)/sum(txpca$sdev^2);
+  #LL vector of the % of variance explained, cumulative
+  
   regpct <- ((txpca$sdev)^2)/sum(txpca$sdev^2);
-  numtokeep <- max(2,length(cumpct[cumpct<0.90]));
+  #LL vector of the % of variance explained by each PC
+  
+  numtokeep <- max(2,length(cumpct[cumpct<=0.90])); #LL
+  #LL keep only the dimensions explaining total 90% of variance
+  
   txpca <- txpca$x[,1:numtokeep];
+  #LL value of the rotated data, each column is a PC, each row an observation
+  # (sample)
+  
   
   # Format the loadings and weight the loadings for each
   # PC by the percentage of variation it explains.
   # Calculate the sum of variation explained by each 
   # variable across all PCs and add that as a column
   finalorder <- loads[,1:numtokeep];
-  rownames(finalorder) <- colnames(justdata);
+  #LL not needed
+  #rownames(finalorder) <- colnames(justdata);
+  #colnames(finalorder) <- paste("PC", c(1:ncol(finalorder)), sep="");
   
-  colnames(finalorder) <- paste("PC", c(1:ncol(finalorder)), sep="");
   weighted <- sweep(finalorder, MARGIN=2, regpct[1:numtokeep], "*");
+  #LL multiply the loadings by the proportion of variance explained
+  
   weighted <- abs(weighted);
   weighted <- apply(weighted, 1, sum, na.rm=TRUE);
   finalorder <- cbind(finalorder, weighted);
@@ -380,7 +401,8 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   
   # Add treatment and batch ID annotation to the data
   txname <- dimnames(txpca)[[1]];
-  ptxpca <- cbind(rep(currbatch, nrow(txpca)), rep(currtx, nrow(txpca)), txname, txpca);
+  ptxpca <- cbind(rep(currbatch, nrow(txpca)), rep(currtx, nrow(txpca)), txname,
+                  txpca);
   ptxpca <- as.matrix(ptxpca);
   
   # The following numbered steps calculate the Mahalanobis distance
@@ -413,7 +435,8 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   }
   else {
     if (nrow(treatments) > 1 && nrow(controls) > 1) {
-      weightcov <- (nrow(controls)/nrow(txpca))*cov(controls) + (nrow(treatments)/nrow(txpca))*cov(treatments);
+      weightcov <- (nrow(controls)/nrow(txpca))*cov(controls) + 
+        (nrow(treatments)/nrow(txpca))*cov(treatments);
     }
     else if (nrow(controls) > 1) {
       weightcov <- cov(controls);
@@ -447,7 +470,8 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
       pcontrols <- scale(pcontrols, scale=FALSE);
       ptreatments <- scale(ptreatments, scale=FALSE);
       if (nrow(ptreatments) > 1 && nrow(pcontrols) > 1) {
-        pweightcov <- (nrow(pcontrols)/nrow(txpca))*cov(pcontrols) + (nrow(ptreatments)/nrow(txpca))*cov(ptreatments);
+        pweightcov <- (nrow(pcontrols)/nrow(txpca))*cov(pcontrols) + 
+          (nrow(ptreatments)/nrow(txpca))*cov(ptreatments);
       }
       else if (nrow(pcontrols) > 1){
         pweightcov <- cov(pcontrols);
@@ -484,18 +508,26 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   # function.
   if (!(unique(txsubset$tx) %in% negctrls)) {
     if (pcaout) {
-      ptxpcanames <- c('batch', 'negctrl', 'tx', paste('PC', 1:(ncol(ptxpca)-3), sep=""));
+      ptxpcanames <- c('batch', 'negctrl', 'tx', paste('PC', 1:(ncol(ptxpca)-3),
+                                                       sep=""));
       ptxpca <- rbind(ptxpcanames, ptxpca);	
-      write.table(ptxpca, paste(c(dirprefix, "pcaout/", currtx, "_vs_", unique(negctrls), "_", currbatch, ".txt"), collapse=""), row.names=FALSE, col.names=FALSE, quote=FALSE, sep="\t");
+      write.table(ptxpca, paste(c(dirprefix, "pcaout/", currtx, "_vs_", 
+                                  unique(negctrls), "_", currbatch, ".txt"), 
+                                collapse=""), 
+                  row.names=FALSE, col.names=FALSE, quote=FALSE, sep="\t");
     }
     if (loadingsout) {
-      nn <- c('readout', dimnames(finalorder)[[2]]);
-      finalorder <- cbind(dimnames(finalorder)[[1]], finalorder);
+      nn <- c('readout', colnames(finalorder));
+      finalorder <- cbind(rownames(finalorder), finalorder);
       finalorder <- rbind(nn, finalorder);
-      write.table(finalorder, paste(c(dirprefix, "loadings/loadings_", currtx, "_vs_", unique(negctrls), "_", currbatch, ".txt"), collapse=""), row.names=FALSE, col.names=FALSE, quote=FALSE, sep="\t");
+      write.table(finalorder, paste(c(dirprefix, "loadings/loadings_", currtx,
+                                      "_vs_", unique(negctrls), "_", currbatch,
+                                      ".txt"), collapse=""), 
+                  row.names=FALSE, col.names=FALSE, quote=FALSE, sep="\t");
     }
     if (gammaout) {
-      return(matrix(c(unique(negctrls), mahal, signf, estrate, estshape, gsignf, fitpval), 1, 7));
+      return(matrix(c(unique(negctrls), mahal, signf, estrate, estshape, gsignf,
+                      fitpval), 1, 7));
     }
     else {
       return(matrix(c(unique(negctrls), mahal, signf), 1, 3));
@@ -547,9 +579,11 @@ checkdata <- function(x) {
 #' @keywords internal
 newlabels <- function(x) {
   y <- sample(x);
+  
   while (identical(y, x)) {
     y <- sample(x);
   }
+  
   return(y);
 }  ## END FUNCTION newlabels
 
