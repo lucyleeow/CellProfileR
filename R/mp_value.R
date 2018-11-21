@@ -72,11 +72,12 @@
 #' 
 
 #' @export
-mpvalue <- function(dataset, txlabels, batchlabels, excludecols=c(), negctrls, dirprefix="/var/www/html/mpvalue/results/", outfile="all_mp-values.txt", allbyall=FALSE, loadingsout=FALSE, pcaout=FALSE, gammaout=FALSE) {
+mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls, dirprefix="/var/www/html/mpvalue/results/", outfile="all_mp-values.txt", allbyall=FALSE, loadingsout=FALSE, pcaout=FALSE, gammaout=FALSE) {
   # Standardizing variable names
   dataset$batch <- as.character(dataset[,names(dataset) %in% batchlabels]);
   dataset$tx <- as.character(dataset[,names(dataset) %in% txlabels]);
-  excludecols <- c(excludecols, txlabels, batchlabels, "tx");
+
+  
   # FUNCTION: newlabels
   # This function takes in labels and permutes them, but does
   # not allow the resulting permutation to be identical to the
@@ -129,7 +130,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, excludecols=c(), negctrls, d
     justdata <- newdf;
     
     # Remove non-numeric columns
-    justdata <- justdata[,!(names(justdata) %in% excludecols)];
+    justdata <- justdata[,datacols];
     readoutnames <- names(justdata);
     justdata <- apply(justdata, 2, as.numeric);
     dimnames(justdata)[[1]] <- as.character(newdf$tx);
