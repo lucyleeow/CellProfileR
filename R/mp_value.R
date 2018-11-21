@@ -176,7 +176,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   # here we want to compare all pairwise tx's/conditions
     
     alltx <- unique(fulldata$tx);
-    currbatch <- unique(fulldata$batch);
+    currbatch <- fulldata$batch[1];
     
     
     for (i in 1:(length(alltx)-1)) {
@@ -251,32 +251,39 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
 
 #' @keywords internal
 .txtomp <- function(txsubset, ncdf, negctrls) {
+  
   # Print the status (which treatment is currently being evaluated)
-  currbatch <- unique(txsubset$batch);
-  currtx <- unique(txsubset$tx);
+  currbatch <- txsubset$batch[1];
+  currtx <- txsubset$tx[1];
+  
+  
   if (!allbyall) {
     cat("running on treatment", currtx, "in batch", currbatch, fill=TRUE);
   }
   
   # Combine tx data with negative control data 
   newdf <- rbind(txsubset, ncdf);
-  justdata <- newdf;
   
   # Remove non-numeric columns
-  justdata <- justdata[,datacols];
-  readoutnames <- names(justdata);
+  justdata <- newdf[,datacols]; #LL
+  
+  justdata_colnames <- colnames(justdata); #LL
   justdata <- apply(justdata, 2, as.numeric);
-  dimnames(justdata)[[1]] <- as.character(newdf$tx);
+  #LL change all columns to numeric data type AND apply will convert to matrix 
   
   # Scale data in both dimensions and perform PCA.
   # Remove replicates that have constant values for all
   # variables
   justdata <- t(scale(t(justdata), center=TRUE, scale=TRUE));
-  dimnames(justdata)[[1]] <- as.character(newdf$tx);
-  dimnames(justdata)[[2]] <- readoutnames;
+  #LL transform - column: sample, row: feature
+  #   scales samples, subtracts column means and divides by column sd
+  #   transforms back - column: feature, row: sample
+  
+  rownames(justdata) <- as.character(newdf$tx);
+  colnames(justdata) <- justdata_colnames;
   
   # Remove rows with all NAs
-  justdata <- justdata[which(rowSums(is.na(justdata)) < ncol(justdata)),];
+  justdata <- justdata[rowSums(is.na(justdata)) < ncol(justdata),];
   
   # Remove any analyses left with only 1 dimension of data (either only 1 row or
   # only 1 column)
@@ -287,39 +294,61 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   
   # Trim columns and rows with the most missing values until the
   # data frame contains no more missing values
+  
   allnas <- sum(is.na(justdata));
+  
   while (allnas > 0) {
-    # Determine the percentage of rows OR columns that would be trimmed
+    
     colnas <- colSums(is.na(justdata));
     rownas <- rowSums(is.na(justdata));
-    colstotrim <- length(colnas[colnas %in% max(colnas)])/length(colnas);
-    rowstotrim <- length(rownas[rownas %in% max(rownas)])/length(rownas);
-    samplefreqs <- as.data.frame(table(dimnames(justdata)[[1]]));
+    
+    prop_colMax <- length(colnas[colnas == max(colnas)])/length(colnas);
+    prop_rowMax <- length(rownas[rownas == max(rownas)])/length(rownas);
+    #LL proportion of rows/cols with the max NA number
+    #LL The total number of NAs across all cols & rows is the same. 
+    # If the NAs are concentrated in a small number of rows/columns,
+    # the prop of max NA cols/rows will be LOW. 
+    
+    samplefreqs <- as.data.frame(table(rownames(justdata))); #LL
     names(samplefreqs) <- c("tx", "origfreq");
-    rowsatrisk <- dimnames(justdata)[[1]][which(rowSums(is.na(justdata)) == max(rowSums(is.na(justdata))))];
+    #LL number of rows (samples) per tx
+    
+    rowsatrisk <- rownames(justdata)[rownas == max(rownas)];
     riskfreqs <- as.data.frame(table(rowsatrisk));
     names(riskfreqs) <- c("tx", "riskremoval");
+    #LL number of rows (samples) that will be removed, per tx
+    
     risking <- merge(samplefreqs, riskfreqs, by="tx");
     risking$left <- risking$origfreq - risking$riskremoval;
-    if (colstotrim < rowstotrim | max(risking$left) < 3) {
-      justdata <- justdata[,which(colSums(is.na(justdata)) < max(colSums(is.na(justdata))))];
+    #LL number of rows (samples) left after removing the max NA rows
+    
+    if (prop_colMax < prop_rowMax | max(risking$left) <= 2) {
+      #LL if the NAs are concentrated in columns OR the maximum number of
+      # rows (samples) per tx left is <= 2, removed the max NA COLUMNS
+      justdata <- justdata[,colnas < max(colnas)];
+      #LL remove the max NA columns
+    } else {
+      justdata <- justdata[rownas < max(rownas),];
     }
-    else {
-      justdata <- justdata[which(rowSums(is.na(justdata)) < max(rowSums(is.na(justdata)))),];
-    }
+    
     allnas <- sum(is.na(justdata));
+    
     checkres <- checkdata(justdata);
     if (length(checkres) > 1) {
       return(checkres);
     }
   }
-  justdata <- justdata[,which(colSums(is.na(justdata)) == 0)];
+  
+  justdata <- justdata[,colSums(is.na(justdata)) == 0];
+  #LL removed all columns containing a NA
+  
   checkres <- checkdata(justdata);
   if (length(checkres) > 1) {
     return(checkres);
   }
   
-  justdata <- justdata[order(dimnames(justdata)[[1]]),];
+  
+  justdata <- justdata[order(rownames(justdata)),];
   txpca <- prcomp(justdata, center=TRUE, scale. = TRUE);
   
   # Extract PCA loadings
