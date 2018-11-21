@@ -396,47 +396,6 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   } ## END FUNCTION txtomp
   
   
-  
-  # FUNCTION: batchtotx
-  # This function takes in a section of the dataset 
-  # corresponding to a single batch, identifies negative
-  # control replicates, breaks the batch-specific dataset
-  # up by treatments, then sends those to get mp-values.
-  batchtotx <- function(fulldata) {
-    if (allbyall) {
-      alltx <- unique(fulldata$tx);
-      currbatch <- unique(fulldata$batch);
-      for (i in 1:(length(alltx)-1)) {
-        negctrls <- alltx[i];
-        numcomps <- length(alltx) - i;
-        cat("running all", numcomps, "comparisons to treatment", negctrls, "in batch", currbatch, fill=TRUE);
-        ncdf <- fulldata[fulldata$tx %in% negctrls,];
-        tempfulldata <- fulldata[fulldata$tx %in% alltx[i+1:length(alltx)],];
-        tempmpvalues <- dlply(tempfulldata, .(tx), txtomp, ncdf=ncdf, negctrls=negctrls);
-        tempmpvalues <- ldply(tempmpvalues, data.frame);
-        if (i %in% "1") {
-          allmpvalues <- tempmpvalues;
-        }
-        else {
-          allmpvalues <- rbind(allmpvalues, tempmpvalues);
-        }
-      }
-    }
-    else {
-      ncdf <- fulldata[fulldata$tx %in% negctrls,];
-      fulldata <- fulldata[!fulldata$tx %in% negctrls,];
-      allmpvalues <- dlply(fulldata, .(tx), txtomp, ncdf=ncdf, negctrls=negctrls);
-      allmpvalues <- ldply(allmpvalues, data.frame);
-    }
-    if (gammaout) {
-      names(allmpvalues) <- c("tx", "compared to", "Mahalanobis", "mp-value", "rate", "shape", "gamma p-value", "gamma fit p-value");
-    }
-    else {
-      names(allmpvalues) <- c("tx", "compared to", "Mahalanobis", "mp-value"); 
-    }
-    return(allmpvalues);
-  }  ## END FUNCTION batchtotx
-  
   # Print all batches:
   cat("All batches:", fill=TRUE);
   cat(unique(dataset$batch), fill=TRUE);
@@ -457,9 +416,58 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   
   # This breaks up the dataset by batch and sends them to be
   # further broken up by treatment
-  finalmpvalues <- dlply(dataset, .(batch), batchtotx);
+  finalmpvalues <- dlply(dataset, .(batch), .batchtotx);
   finalmpvalues <- ldply(finalmpvalues, data.frame);
   cat("Writing output file\n");
   write.table(finalmpvalues, file=outfile, append=FALSE, sep="\t", row.names=FALSE, col.names=TRUE, quote=FALSE);
   
 }  ## END FUNCTION mpvalue
+
+
+
+
+# FUNCTION: .batchtotx
+# This function takes in a section of the dataset 
+# corresponding to a single batch, identifies negative
+# control replicates, breaks the batch-specific dataset
+# up by treatments, then sends those to get mp-values.
+
+#' @keywords internal
+.batchtotx <- function(fulldata) {
+  if (allbyall) {
+    alltx <- unique(fulldata$tx);
+    currbatch <- unique(fulldata$batch);
+    for (i in 1:(length(alltx)-1)) {
+      negctrls <- alltx[i];
+      numcomps <- length(alltx) - i;
+      cat("running all", numcomps, "comparisons to treatment", negctrls, "in batch", currbatch, fill=TRUE);
+      ncdf <- fulldata[fulldata$tx %in% negctrls,];
+      tempfulldata <- fulldata[fulldata$tx %in% alltx[i+1:length(alltx)],];
+      tempmpvalues <- dlply(tempfulldata, .(tx), txtomp, ncdf=ncdf, negctrls=negctrls);
+      tempmpvalues <- ldply(tempmpvalues, data.frame);
+      if (i %in% "1") {
+        allmpvalues <- tempmpvalues;
+      }
+      else {
+        allmpvalues <- rbind(allmpvalues, tempmpvalues);
+      }
+    }
+  }
+  else {
+    ncdf <- fulldata[fulldata$tx %in% negctrls,];
+    fulldata <- fulldata[!fulldata$tx %in% negctrls,];
+    allmpvalues <- dlply(fulldata, .(tx), txtomp, ncdf=ncdf, negctrls=negctrls);
+    allmpvalues <- ldply(allmpvalues, data.frame);
+  }
+  if (gammaout) {
+    names(allmpvalues) <- c("tx", "compared to", "Mahalanobis", "mp-value", "rate", "shape", "gamma p-value", "gamma fit p-value");
+  }
+  else {
+    names(allmpvalues) <- c("tx", "compared to", "Mahalanobis", "mp-value"); 
+  }
+  return(allmpvalues);
+}  ## END FUNCTION .batchtotx
+
+
+
+
