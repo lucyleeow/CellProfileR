@@ -38,9 +38,40 @@
 #
 #-------------------------------------------------------------------------------------------------
 
+#' mp-value
+#' 
+#' Calculate mp-values as described in 
+#' \href{https://journals.sagepub.com/doi/10.1177/1087057112469257}{Hutz et al.}.
+#' 
+#' 
+#' @param dataset Dataframe containing all data where each row is a sample and
+#'     each columns is a feature/variable.
+#' @param txlabels Name of the column containing the treatment labels, as 
+#'     string.
+#' @param batchlabels Name of the column containing the batch labels, as string
+#' @param datacols Vector of column numbers containing the feature/variable data
+#'     to be used for calculating the mp-value.
+#' @param negctrls The string identifying the negative control, in the 
+#'     'txlabels' column.
+#' @param allbyall Logical indicating whether to do all treatment-treatment
+#'     comparisons (TRUE) or only treatment-control comparisons.
+#' @param dirprefix Path to the directory to store results in, as string. 
+#'     Include '/' at the end. This path must already exist.
+#' @param outfile Name of the file to save all the mp-values, as string.
+#' @param loadingsout Logical indicating whether the PCA loadings should be
+#'     output.
+#' @param pcaout Logical indicating whether to output PCA values
+#' @param gammaout Logical indicating whether to output gamma distribution
+#'     parameters, p-value of goodness of fit and sample p-value according to 
+#'     the fit distribution.
+#'     NOTE: When gammaout=TRUE, warnings like these may be displayed:
+# 		 "In dgamma(x, shape, scale, log) : NaNs produced"
+# 		 These occur when the gamma distribution parameters are being
+# 		 derived and are generally not a problem.
+#' 
+#' 
 
-library("plyr");
-
+#' @export
 mpvalue <- function(dataset, txlabels, batchlabels, excludecols=c(), negctrls, dirprefix="/var/www/html/mpvalue/results/", outfile="all_mp-values.txt", allbyall=FALSE, loadingsout=FALSE, pcaout=FALSE, gammaout=FALSE) {
   # Standardizing variable names
   dataset$batch <- as.character(dataset[,names(dataset) %in% batchlabels]);
