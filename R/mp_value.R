@@ -128,8 +128,8 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
 
   
   # Standardizing variable names
-  dataset$batch <- as.character(dataset[,names(dataset) %in% batchlabels]);
-  dataset$tx <- as.character(dataset[,names(dataset) %in% txlabels]);
+  dataset$batch <- as.character(dataset[[batchlabels]]);
+  dataset$tx <- as.character(dataset[[txlabels]]);
 
   
   # FUNCTION: newlabels
