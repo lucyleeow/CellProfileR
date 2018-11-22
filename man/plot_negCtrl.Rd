@@ -11,7 +11,8 @@ plot_negCtrl(df, feature, annot, neg_ctrl)
 
 \item{feature}{Name of the feature column to plot as string.}
 
-\item{annot}{Name of the column containing the annotation data as string.}
+\item{annot}{Name of the column containing the negative control terms
+as string.}
 
 \item{neg_ctrl}{The term labelling the negative control wells in the 
 annotation (e.g. "DMSO"), as string.}
