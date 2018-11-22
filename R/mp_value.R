@@ -227,16 +227,18 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
     ncdf <- fulldata[fulldata$tx == negctrls,];
     #LL negative control df, 'negctrls' here is the one input by the user 
     
-    txdf <- fulldata[!fulldata$tx %in% negctrls,];
+    txdf <- fulldata[!fulldata$tx == negctrls,];
     #LL all NOT negctrls rows
     
     allmpvalues <- plyr::dlply(txdf, .(tx), .txtomp, ncdf=ncdf, 
                          negctrls=negctrls);
     #LL group by tx, apply function .txtomp to every group. Arguments to .txtomp
     # ncdf and negctrls as given 
+    
     allmpvalues <- plyr::ldply(allmpvalues, data.frame);
     
   }
+  
   if (gammaout) {
     colnames(allmpvalues) <- c("tx", "compared to", "Mahalanobis", "mp-value", 
                             "rate", "shape", "gamma p-value", 
