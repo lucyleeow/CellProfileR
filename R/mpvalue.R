@@ -145,7 +145,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   if (!allbyall) {
     # Limit the dataset to only those batches with at least 
     # 1 negative control
-    goodbatches <- unique(dataset$batch[dataset$tx %in% negctrls]);
+    goodbatches <- unique(dataset$batch[dataset$tx == negctrls]);
     badbatches <- unique(dataset$batch)[!unique(dataset$batch) %in% goodbatches];
     
     if (length(badbatches) <= 0) {
@@ -162,7 +162,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   # This breaks up the dataset by batch and sends them to be
   # further broken up by treatment
   finalmpvalues <- plyr::dlply(dataset, plyr::.(batch), .batchtotx,
-                               allbyall = allbyall);
+                               allbyall = allbyall, negctrls = negctrls);
   finalmpvalues <- plyr::ldply(finalmpvalues, data.frame);
   cat("Writing output file\n");
   write.table(finalmpvalues, file=outfile, append=FALSE, sep="\t", 
@@ -180,7 +180,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
 # up by treatments, then sends those to get mp-values.
 
 #' @keywords internal
-.batchtotx <- function(fulldata, allbyall) {
+.batchtotx <- function(fulldata, allbyall, negctrls) {
   
   if (allbyall) {
   # here we want to compare all pairwise tx's/conditions
