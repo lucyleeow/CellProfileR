@@ -1,30 +1,4 @@
-#!/usr/local/bin/R
 
-# This function (mpvalue) calculates mp-values for
-# all treatments at the batch level.
-# Inputs are as follows:
-# dataset: 	a data frame where each row is a sample
-# 		and each column is a variable.
-# txlabels: the column name containing the treatment labels
-# batchlabels:	the column name containing the batch labels
-# datacols: the numbers of the columns containing the data to be
-# 		used for calculating the mp-value
-# negctrls: tx identifier(s) for the negative control treatments
-# dirprefix:	directory to store results in (include / at the end).
-# 			This directory must already exist.
-# allbyall:	logical value; if TRUE, do all treatment-treatment
-# 		comparisons; if FALSE, do only treatment-negative control
-# 		comparisons
-# outfile: 	filename to save all mp-values
-# loadingsout:	logical value; if TRUE, output PCA loadings
-# pcaout:	logical value; if TRUE, output PCA values
-# gammaout:	logical value; if TRUE, output gamma distribution parameters,
-# 		p-value for goodness of fit, and sample p-value according to
-# 		the fit distribution
-# 		NOTE: When gammaout=TRUE, warnings like these may be displayed:
-# 		"In dgamma(x, shape, scale, log) : NaNs produced"
-# 		These occur when the gamma distribution parameters are being
-# 		derived and are generally not a problem.
 # Example: -------------------------------------------------------------------------------------
 # This example uses the well-known 'iris' dataset in R.
 # > iris$batch <- rep(1, nrow(iris));
@@ -90,7 +64,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   
   ## character inputs
   character_args <- list(txlabels = txlabels, batchlabels = batchlabels, 
-                         negctrls = negctrls, dirprefix= dirprefix,
+                         negctrls = negctrls, dirprefix = dirprefix,
                          outfile = outfile)
   
   for (i in 1:length(character_args)){
@@ -115,7 +89,6 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
     
   }
   
-
   
   ## logical inputs
   logical_args <- list(allbyall = allbyall, loadingsout = loadingsout, 
@@ -164,7 +137,8 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   finalmpvalues <- plyr::dlply(dataset, plyr::.(batch), .batchtotx,
                                allbyall = allbyall, negctrls = negctrls,
                                datacols = datacols, gammaout = gammaout,
-                               pcaout = pcaout, loadingsout = loadingsout);
+                               pcaout = pcaout, loadingsout = loadingsout,
+                               dirprefix = dirprefix);
   finalmpvalues <- plyr::ldply(finalmpvalues, data.frame);
   cat("Writing output file\n");
   write.table(finalmpvalues, file=outfile, append=FALSE, sep="\t", 
@@ -183,7 +157,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
 
 #' @keywords internal
 .batchtotx <- function(fulldata, allbyall, negctrls, datacols, gammaout,
-                       pcaout, loadingsout) {
+                       pcaout, loadingsout, dirprefix) {
   
   if (allbyall) {
   # here we want to compare all pairwise tx's/conditions
@@ -239,7 +213,8 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
     allmpvalues <- plyr::dlply(txdf, plyr::.(tx), .txtomp, ncdf=ncdf, 
                          negctrls=negctrls, allbyall = allbyall, 
                          datacols = datacols, gammaout = gammaout,
-                         pcaout = pcaout, loadingsout = loadingsout);
+                         pcaout = pcaout, loadingsout = loadingsout,
+                         dirprefix = dirprefix);
     #LL group by tx, apply function .txtomp to every group. Arguments to .txtomp
     # ncdf and negctrls as given 
     
@@ -268,7 +243,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
 
 #' @keywords internal
 .txtomp <- function(txsubset, ncdf, negctrls, allbyall, datacols, gammaout,
-                    pcaout, loadingsout) {
+                    pcaout, loadingsout, dirprefix) {
   
   # Print the status (which treatment is currently being evaluated)
   currbatch <- txsubset$batch[1];
