@@ -163,7 +163,8 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   # further broken up by treatment
   finalmpvalues <- plyr::dlply(dataset, plyr::.(batch), .batchtotx,
                                allbyall = allbyall, negctrls = negctrls,
-                               datacols = datacols, gammaout = gammaout);
+                               datacols = datacols, gammaout = gammaout,
+                               pcaout = pcaout, loadingsout = loadingsout);
   finalmpvalues <- plyr::ldply(finalmpvalues, data.frame);
   cat("Writing output file\n");
   write.table(finalmpvalues, file=outfile, append=FALSE, sep="\t", 
@@ -181,7 +182,8 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
 # up by treatments, then sends those to get mp-values.
 
 #' @keywords internal
-.batchtotx <- function(fulldata, allbyall, negctrls, datacols, gammaout) {
+.batchtotx <- function(fulldata, allbyall, negctrls, datacols, gammaout,
+                       pcaout, loadingsout) {
   
   if (allbyall) {
   # here we want to compare all pairwise tx's/conditions
@@ -236,7 +238,8 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
     
     allmpvalues <- plyr::dlply(txdf, plyr::.(tx), .txtomp, ncdf=ncdf, 
                          negctrls=negctrls, allbyall = allbyall, 
-                         datacols = datacols, gammaout = gammaout);
+                         datacols = datacols, gammaout = gammaout,
+                         pcaout = pcaout, loadingsout = loadingsout);
     #LL group by tx, apply function .txtomp to every group. Arguments to .txtomp
     # ncdf and negctrls as given 
     
@@ -264,7 +267,8 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
 # It produces an mp-value based 
 
 #' @keywords internal
-.txtomp <- function(txsubset, ncdf, negctrls, allbyall, datacols, gammaout) {
+.txtomp <- function(txsubset, ncdf, negctrls, allbyall, datacols, gammaout,
+                    pcaout, loadingsout) {
   
   # Print the status (which treatment is currently being evaluated)
   currbatch <- txsubset$batch[1];
