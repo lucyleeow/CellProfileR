@@ -61,8 +61,8 @@
 #' @param dirprefix Path to the directory to store results in, as string. 
 #'     This path will be created if it does not already exist.
 #' @param outfile Name of the file to save all the mp-values, as string.
-#' @param loadingsout Logical indicating whether the PCA loadings should be
-#'     output.
+#' @param loadingsout Logical indicating whether the PCA loadings (eigenvectors)
+#'     should be output.
 #' @param pcaout Logical indicating whether to output PCA values
 #' @param gammaout Logical indicating whether to output gamma distribution
 #'     parameters, p-value of goodness of fit and sample p-value according to 
@@ -260,6 +260,8 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   # Print the status (which treatment is currently being evaluated)
   currbatch <- txsubset$batch[1];
   currtx <- txsubset$tx[1];
+  numtx <- nrow(txsubset)
+  num_ctrls <- nrow(negctrls)
   
   
   if (!allbyall) {
@@ -292,7 +294,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   
   # Remove any analyses left with only 1 dimension of data (either only 1 row or
   # only 1 column)
-  checkres <- checkdata(justdata);
+  checkres <- .checkdata(justdata);
   if (length(checkres) > 1) {
     return(checkres);
   }
@@ -338,7 +340,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
     
     allnas <- sum(is.na(justdata));
     
-    checkres <- checkdata(justdata);
+    checkres <- .checkdata(justdata);
     if (length(checkres) > 1) {
       return(checkres);
     }
@@ -347,7 +349,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   justdata <- justdata[,colSums(is.na(justdata)) == 0];
   #LL removed all columns containing a NA
   
-  checkres <- checkdata(justdata);
+  checkres <- .checkdata(justdata);
   if (length(checkres) > 1) {
     return(checkres);
   }
@@ -355,13 +357,14 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   
   justdata <- justdata[order(rownames(justdata)),];
   
+  
   txpca <- prcomp(justdata, center=TRUE, scale. = TRUE);
   # LL perform PCA, returns list with: sd of the PC's square roots of the 
   # eigenvalues, matrix of variable loadings (columns are eigenvectors)
   
   
   # Extract PCA loadings
-  loads <- txpca$rotation;
+  eigenvectors <- txpca$rotation;
   
   # Determine the number of PCs explaining 90% of the
   # total variation and keep only those PCs
@@ -379,36 +382,44 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   # (sample)
   
   
-  # Format the loadings and weight the loadings for each
+  # Format the eigenvectors and weight the eigenvectors for each
   # PC by the percentage of variation it explains.
   # Calculate the sum of variation explained by each 
   # variable across all PCs and add that as a column
-  finalorder <- loads[,1:numtokeep];
-  #LL not needed
+  finalorder <- eigenvectors[,1:numtokeep];
+  
+  #LL not needed?
   #rownames(finalorder) <- colnames(justdata);
   #colnames(finalorder) <- paste("PC", c(1:ncol(finalorder)), sep="");
   
   weighted <- sweep(finalorder, MARGIN=2, regpct[1:numtokeep], "*");
-  #LL multiply the loadings by the proportion of variance explained
+  #LL multiply the eigenvectors by the proportion of variance explained
   
   weighted <- abs(weighted);
   weighted <- apply(weighted, 1, sum, na.rm=TRUE);
+  #LL add weighted eigenvectors, across each feature (row)
   finalorder <- cbind(finalorder, weighted);
+  #LL output is eigenvectors and a weighted column
   
-  # Weight each PC by the percentage of variation it
+  
+  # Weight each PC (x) by the percentage of variation it
   # explains.
   txpca <- sweep(txpca, MARGIN=2, regpct[1:numtokeep], "*");
   
   # Add treatment and batch ID annotation to the data
-  txname <- dimnames(txpca)[[1]];
+  txname <- rownames(justdata); #LL
+  rownames(txpca) <- txname #LL
   ptxpca <- cbind(rep(currbatch, nrow(txpca)), rep(currtx, nrow(txpca)), txname,
                   txpca);
   ptxpca <- as.matrix(ptxpca);
   
+  
+  
   # The following numbered steps calculate the Mahalanobis distance
   # 1. Separate treatments from controls
-  controls <- as.matrix(txpca[txname %in% negctrls,]);
-  treatments <- as.matrix(txpca[!(txname %in% negctrls),]);
+  controls <- as.matrix(txpca[txname == negctrls,]); #LL
+  treatments <- as.matrix(txpca[!(txname == negctrls),]); #LL
+  #LL matrix of rotated data
   
   # 2. Calculate means for each variable in each group 
   if (ncol(controls) == 1 & nrow(controls) > 1) {
@@ -417,7 +428,10 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   if (ncol(treatments) == 1 & nrow(treatments) > 1) {
     treatments <- t(treatments);
   }
+  #LL should you be transposing the data?? 
+  
   vardiffs <- colMeans(treatments) - colMeans(controls);
+  #LL PC means
   
   # 3. Calculate covariance matrix 
   # If there are insufficient numbers of replicates, this
@@ -425,18 +439,19 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   # if/else statement here.
   controls <- scale(controls, scale=FALSE);
   treatments <- scale(treatments, scale=FALSE);
-  if (nrow(treatments) == 1 && nrow(controls) < 3) {
+  #LL scale rotated data by subtracting the column means
+  
+  if (nrow(treatments) == 1 && nrow(controls) <= 2) {
     mahal <- 0;
     signf <- 1;
-  }
-  else if (nrow(controls) == 1 && nrow(treatments) < 3) {
+  } else if (nrow(controls) == 1 && nrow(treatments) <= 2) {
     mahal <- 0;
     signf <- 1;
-  }
-  else {
+  } else {
     if (nrow(treatments) > 1 && nrow(controls) > 1) {
       weightcov <- (nrow(controls)/nrow(txpca))*cov(controls) + 
         (nrow(treatments)/nrow(txpca))*cov(treatments);
+      #LL weight covariance by proportion of samples
     }
     else if (nrow(controls) > 1) {
       weightcov <- cov(controls);
@@ -451,20 +466,24 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
     # differences and the covariance matrix.
     mahal <- sqrt(t(vardiffs) %*% (weightcov %*% vardiffs));
     mahal <- as.numeric(mahal);
+    
+    
     # Permute the labels and re-calculate Mahalanobis distances 1000 times.
-    permscores <- as.numeric();
-    length(permscores) <- 1000;
+    permscores <- vector(mode = "numeric", length = 1000); #LL
+    
     for (i in 1:1000) {
-      ptxname <- newlabels(dimnames(txpca)[[1]]);
+      ptxname <- newlabels(rownames(txpca));
       
-      pcontrols <- as.matrix(txpca[ptxname %in% negctrls,]);
-      ptreatments <- as.matrix(txpca[!(ptxname %in% negctrls),]);
+      pcontrols <- as.matrix(txpca[ptxname == negctrls,]);
+      ptreatments <- as.matrix(txpca[!(ptxname == negctrls),]);
+      
       if (ncol(pcontrols) == 1 & nrow(pcontrols) > 1) {
         pcontrols <- t(pcontrols);
       }
       if (ncol(ptreatments) == 1 & nrow(ptreatments) > 1) {
         ptreatments <- t(ptreatments);
       }
+      
       pvardiffs <- colMeans(ptreatments) - colMeans(pcontrols);
       
       pcontrols <- scale(pcontrols, scale=FALSE);
@@ -493,8 +512,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   
   # Gamma distribution significance
   if (gammaout) {
-    library(MASS);
-    est <- fitdistr(permscores,"gamma");
+    est <- MASS::fitdistr(permscores,"gamma");
     estrate <- est$estimate[names(est$estimate) %in% "rate"];
     estshape <- est$estimate[names(est$estimate) %in% "shape"];
     gsignf <- pgamma(mahal, shape=estshape, rate=estrate, lower.tail=FALSE);
@@ -506,7 +524,8 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   # For all treatments, output the PCA coordinates and the PCA loadings
   # and send back the Mahalanobis distance and mp-values to the parent
   # function.
-  if (!(unique(txsubset$tx) %in% negctrls)) {
+  
+  if (!(unique(txsubset$tx) == negctrls)) {
     if (pcaout) {
       ptxpcanames <- c('batch', 'negctrl', 'tx', paste('PC', 1:(ncol(ptxpca)-3),
                                                        sep=""));
@@ -536,13 +555,13 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
 } ## END FUNCTION .txtomp
 
 
-# FUNCTION: checkdata
+# FUNCTION: .checkdata
 # This function takes in data and checks to make sure that (1) it is a
 # matrix (not a vector) and (2) that the matrix has the minimum number
 # of columns and rows to be used for this analysis.
 
 #' @keywords internal
-checkdata <- function(x) {
+.checkdata <- function(x) {
   baddata <- FALSE;
   numtx <- length(unique(rownames(x))); #LL
   
