@@ -289,7 +289,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   #   transforms back - column: feature, row: sample
   
   rownames(justdata) <- as.character(newdf$tx);
-  colnames(justdata) <- justdata_colnames;
+  #colnames(justdata) <- justdata_colnames;
   
   # Remove rows with all NAs
   justdata <- justdata[rowSums(is.na(justdata)) < ncol(justdata),];
@@ -390,10 +390,6 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   # variable across all PCs and add that as a column
   finalorder <- eigenvectors[,1:numtokeep];
   
-  #LL not needed?
-  #rownames(finalorder) <- colnames(justdata);
-  #colnames(finalorder) <- paste("PC", c(1:ncol(finalorder)), sep="");
-  
   weighted <- sweep(finalorder, MARGIN=2, regpct[1:numtokeep], "*");
   #LL multiply the eigenvectors by the proportion of variance explained
   
@@ -403,14 +399,13 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   finalorder <- cbind(finalorder, weighted);
   #LL output is eigenvectors and a weighted column
   
-  
   # Weight each PC (x) by the percentage of variation it
   # explains.
   txpca <- sweep(txpca, MARGIN=2, regpct[1:numtokeep], "*");
   
   # Add treatment and batch ID annotation to the data
   txname <- rownames(justdata); #LL
-  rownames(txpca) <- txname #LL
+  #rownames(txpca) <- txname #LL not needed
   ptxpca <- cbind(rep(currbatch, nrow(txpca)), rep(currtx, nrow(txpca)), txname,
                   txpca);
   ptxpca <- as.matrix(ptxpca);
@@ -421,7 +416,8 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   # 1. Separate treatments from controls
   controls <- as.matrix(txpca[txname == negctrls,]); #LL
   treatments <- as.matrix(txpca[!(txname == negctrls),]); #LL
-  #LL matrix of rotated data
+  #LL matrix of rotated data. Output of subsetting transposed if only 1 sample
+  # in each group.
   
   # 2. Calculate means for each variable in each group 
   if (ncol(controls) == 1 & nrow(controls) > 1) {
@@ -430,7 +426,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   if (ncol(treatments) == 1 & nrow(treatments) > 1) {
     treatments <- t(treatments);
   }
-  #LL should you be transposing the data?? 
+  #LL check and transpose due to subsetting (see above)
   
   vardiffs <- colMeans(treatments) - colMeans(controls);
   #LL PC means
@@ -461,8 +457,9 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
     else {
       weightcov <- cov(treatments);
     }
+    
     weightcov <- solve(weightcov);
-    vardiffs <- as.matrix(vardiffs);
+    #vardiffs <- as.matrix(vardiffs);
     
     # 4. Calculate the Mahalanobis distance using the group mean
     # differences and the covariance matrix.
@@ -500,6 +497,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
       else {
         pweightcov <- cov(ptreatments);
       }
+      
       pweightcov <- solve(pweightcov);
       
       pvardiffs <- as.matrix(pvardiffs);
@@ -510,7 +508,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
     # Calculate the mp-value by determining the number of permutations
     # that produce a Mahalanobis distance higher than the original
     signf <- length(permscores[permscores>=mahal])/length(permscores);
-  }
+  } #LL end else
   
   # Gamma distribution significance
   if (gammaout) {
