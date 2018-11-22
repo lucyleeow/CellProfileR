@@ -264,7 +264,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
 # It produces an mp-value based 
 
 #' @keywords internal
-.txtomp <- function(txsubset, ncdf, negctrls, allbyall, datacols) {
+.txtomp <- function(txsubset, ncdf, negctrls, allbyall, datacols, gammaout) {
   
   # Print the status (which treatment is currently being evaluated)
   currbatch <- txsubset$batch[1];
