@@ -161,7 +161,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   
   # This breaks up the dataset by batch and sends them to be
   # further broken up by treatment
-  finalmpvalues <- plyr::dlply(dataset, .(batch), .batchtotx);
+  finalmpvalues <- plyr::dlply(dataset, plyr::.(batch), .batchtotx);
   finalmpvalues <- plyr::ldply(finalmpvalues, data.frame);
   cat("Writing output file\n");
   write.table(finalmpvalues, file=outfile, append=FALSE, sep="\t", 
@@ -206,8 +206,8 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
       #LL data of all the tx's to compare the to 'ith' tx ('negctrl') to 
       # i.e. all unique tx's after the ith tx.
       
-      tempmpvalues <- plyr::dlply(comparisontx_data, .(tx), .txtomp, ncdf=ncdf, 
-                            negctrls=negctrls);
+      tempmpvalues <- plyr::dlply(comparisontx_data, plyr::.(tx), .txtomp, 
+                                  ncdf=ncdf, negctrls=negctrls);
       #LL input: df, output: list. Group by the tx column, perform the function
       # .txtomp, with the 'ncdf' and 'negctrls' arguments as given 
       
@@ -232,7 +232,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
     txdf <- fulldata[!fulldata$tx == negctrls,];
     #LL all NOT negctrls rows
     
-    allmpvalues <- plyr::dlply(txdf, .(tx), .txtomp, ncdf=ncdf, 
+    allmpvalues <- plyr::dlply(txdf, plyr::.(tx), .txtomp, ncdf=ncdf, 
                          negctrls=negctrls);
     #LL group by tx, apply function .txtomp to every group. Arguments to .txtomp
     # ncdf and negctrls as given 
