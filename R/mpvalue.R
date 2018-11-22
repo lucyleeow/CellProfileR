@@ -163,7 +163,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   # further broken up by treatment
   finalmpvalues <- plyr::dlply(dataset, plyr::.(batch), .batchtotx,
                                allbyall = allbyall, negctrls = negctrls,
-                               datacols = datacols);
+                               datacols = datacols, gammaout = gammaout);
   finalmpvalues <- plyr::ldply(finalmpvalues, data.frame);
   cat("Writing output file\n");
   write.table(finalmpvalues, file=outfile, append=FALSE, sep="\t", 
@@ -181,7 +181,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
 # up by treatments, then sends those to get mp-values.
 
 #' @keywords internal
-.batchtotx <- function(fulldata, allbyall, negctrls, datacols) {
+.batchtotx <- function(fulldata, allbyall, negctrls, datacols, gammaout) {
   
   if (allbyall) {
   # here we want to compare all pairwise tx's/conditions
@@ -236,7 +236,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
     
     allmpvalues <- plyr::dlply(txdf, plyr::.(tx), .txtomp, ncdf=ncdf, 
                          negctrls=negctrls, allbyall = allbyall, 
-                         datacols = datacols);
+                         datacols = datacols, gammaout = gammaout);
     #LL group by tx, apply function .txtomp to every group. Arguments to .txtomp
     # ncdf and negctrls as given 
     
@@ -301,7 +301,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   
   # Remove any analyses left with only 1 dimension of data (either only 1 row or
   # only 1 column)
-  checkres <- .checkdata(justdata);
+  checkres <- .checkdata(justdata, gammaout = gammaout, negctrls = negctrls);
   if (length(checkres) > 1) {
     return(checkres);
   }
@@ -347,7 +347,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
     
     allnas <- sum(is.na(justdata));
     
-    checkres <- .checkdata(justdata);
+    checkres <- .checkdata(justdata, gammaout = gammaout, negctrls = negctrls);
     if (length(checkres) > 1) {
       return(checkres);
     }
@@ -356,7 +356,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   justdata <- justdata[,colSums(is.na(justdata)) == 0];
   #LL removed all columns containing a NA
   
-  checkres <- .checkdata(justdata);
+  checkres <- .checkdata(justdata, gammaout = gammaout, negctrls = negctrls);
   if (length(checkres) > 1) {
     return(checkres);
   }
@@ -566,7 +566,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
 # of columns and rows to be used for this analysis.
 
 #' @keywords internal
-.checkdata <- function(x) {
+.checkdata <- function(x, gammaout, negctrls) {
   baddata <- FALSE;
   numtx <- length(unique(rownames(x))); #LL
   
