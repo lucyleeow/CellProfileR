@@ -145,20 +145,22 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
     # 1 negative control
     goodbatches <- unique(dataset$batch[dataset$tx %in% negctrls]);
     badbatches <- unique(dataset$batch)[!unique(dataset$batch) %in% goodbatches];
-    if (length(badbatches) < 1) {
+    
+    if (length(badbatches) <= 0) {
       cat("All batches contain at least 1 negative control.", fill=TRUE);
-    }
-    else {
+    } else if (length(badbatches >= 1)) {
       cat("The following batches do not contain negative controls and will be removed:", 
           badbatches, fill=TRUE);
+    } else {
+      cat("All batches contain at least 1 negative control")
     }
     dataset <- dataset[dataset$batch %in% goodbatches,];
   }
   
   # This breaks up the dataset by batch and sends them to be
   # further broken up by treatment
-  finalmpvalues <- dlply(dataset, .(batch), .batchtotx);
-  finalmpvalues <- ldply(finalmpvalues, data.frame);
+  finalmpvalues <- plyr::dlply(dataset, .(batch), .batchtotx);
+  finalmpvalues <- plyr::ldply(finalmpvalues, data.frame);
   cat("Writing output file\n");
   write.table(finalmpvalues, file=outfile, append=FALSE, sep="\t", 
               row.names=FALSE, col.names=TRUE, quote=FALSE);
@@ -214,21 +216,21 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
       if (i == 1) { #LL
         allmpvalues <- tempmpvalues;
         #LL for the first loop - store the mp values
-      }
-      else {
+      } else {
         allmpvalues <- rbind(allmpvalues, tempmpvalues);
         #LL growing df of successive mp-values for other comparisons
       }
     } # end of for loop
+    
   } else { #LL if NOT allbyall
     
     ncdf <- fulldata[fulldata$tx == negctrls,];
     #LL negative control df, 'negctrls' here is the one input by the user 
     
-    fulldata <- fulldata[!fulldata$tx %in% negctrls,];
+    txdf <- fulldata[!fulldata$tx %in% negctrls,];
     #LL all NOT negctrls rows
     
-    allmpvalues <- plyr::dlply(fulldata, .(tx), .txtomp, ncdf=ncdf, 
+    allmpvalues <- plyr::dlply(txdf, .(tx), .txtomp, ncdf=ncdf, 
                          negctrls=negctrls);
     #LL group by tx, apply function .txtomp to every group. Arguments to .txtomp
     # ncdf and negctrls as given 
@@ -260,8 +262,6 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   # Print the status (which treatment is currently being evaluated)
   currbatch <- txsubset$batch[1];
   currtx <- txsubset$tx[1];
-  numtx <- nrow(txsubset)
-  num_ctrls <- nrow(negctrls)
   
   
   if (!allbyall) {
