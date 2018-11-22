@@ -162,7 +162,8 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   # This breaks up the dataset by batch and sends them to be
   # further broken up by treatment
   finalmpvalues <- plyr::dlply(dataset, plyr::.(batch), .batchtotx,
-                               allbyall = allbyall, negctrls = negctrls);
+                               allbyall = allbyall, negctrls = negctrls,
+                               datacols = datacols);
   finalmpvalues <- plyr::ldply(finalmpvalues, data.frame);
   cat("Writing output file\n");
   write.table(finalmpvalues, file=outfile, append=FALSE, sep="\t", 
@@ -180,7 +181,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
 # up by treatments, then sends those to get mp-values.
 
 #' @keywords internal
-.batchtotx <- function(fulldata, allbyall, negctrls) {
+.batchtotx <- function(fulldata, allbyall, negctrls, datacols) {
   
   if (allbyall) {
   # here we want to compare all pairwise tx's/conditions
@@ -234,7 +235,8 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
     #LL all NOT negctrls rows
     
     allmpvalues <- plyr::dlply(txdf, plyr::.(tx), .txtomp, ncdf=ncdf, 
-                         negctrls=negctrls, allbyall = allbyall);
+                         negctrls=negctrls, allbyall = allbyall, 
+                         datacols = datacols);
     #LL group by tx, apply function .txtomp to every group. Arguments to .txtomp
     # ncdf and negctrls as given 
     
@@ -262,7 +264,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
 # It produces an mp-value based 
 
 #' @keywords internal
-.txtomp <- function(txsubset, ncdf, negctrls, allbyall) {
+.txtomp <- function(txsubset, ncdf, negctrls, allbyall, datacols) {
   
   # Print the status (which treatment is currently being evaluated)
   currbatch <- txsubset$batch[1];
