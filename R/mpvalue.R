@@ -103,6 +103,39 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
                 msg = msg)
     
   }
+  
+  # creat dirs
+  if (pcaout) {
+    
+    dir_pca <- paste(dirprefix, "/pcaout", sep = "")
+    
+    if (! dir.exists(dir_pca)) {
+      
+      dir.create_out <- dir.create(dir_pca, recursive = TRUE)
+      ## check dir.create worked
+      assert_that(dir.create_out, 
+                  msg = "Could not create '/pcaout' folder in your 'dirprefix'.
+                  Check path given")
+      
+    }
+    
+  }
+  
+  if (pcaout) {
+    
+    dir_loadings <- paste(dirprefix, "/loadings", sep = "")
+    
+    if (! dir.exists(dir_loadings)) {
+      
+      dir.create_out <- dir.create(dir_loadings, recursive = TRUE)
+      ## check dir.create worked
+      assert_that(dir.create_out, 
+                  msg = "Could not create '/loadings' folder in your 'dirprefix'.
+                  Check path given")
+      
+    }
+    
+  }
 
   
   # Standardizing variable names
@@ -514,7 +547,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
       ptxpcanames <- c('batch', 'negctrl', 'tx', paste('PC', 1:(ncol(ptxpca)-3),
                                                        sep=""));
       ptxpca <- rbind(ptxpcanames, ptxpca);	
-      write.table(ptxpca, paste(c(dirprefix, "pcaout/", currtx, "_vs_", 
+      write.table(ptxpca, paste(c(dirprefix, "/pcaout/", currtx, "_vs_", 
                                   unique(negctrls), "_", currbatch, ".txt"), 
                                 collapse=""), 
                   row.names=FALSE, col.names=FALSE, quote=FALSE, sep="\t");
@@ -523,7 +556,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
       nn <- c('readout', colnames(finalorder));
       finalorder <- cbind(rownames(finalorder), finalorder);
       finalorder <- rbind(nn, finalorder);
-      write.table(finalorder, paste(c(dirprefix, "loadings/loadings_", currtx,
+      write.table(finalorder, paste(c(dirprefix, "/loadings/loadings_", currtx,
                                       "_vs_", unique(negctrls), "_", currbatch,
                                       ".txt"), collapse=""), 
                   row.names=FALSE, col.names=FALSE, quote=FALSE, sep="\t");
