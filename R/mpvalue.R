@@ -108,12 +108,14 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   ## create path
   if (! dir.exists(dirprefix)) {
     
-    a <- dir.create(dirprefix, recursive = TRUE)
+    dir.create_out <- dir.create(dirprefix, recursive = TRUE)
+    ## check dir.create worked
+    assert_that(dir.create_out, 
+                msg = "Could not create your 'dirprefix', check path given")
     
   }
   
-  ## check dir.create worked
-  assert_that(a, msg = "Could not create your 'dirprefix', check path given")
+
   
   ## logical inputs
   logical_args <- list(allbyall = allbyall, loadingsout = loadingsout, 
