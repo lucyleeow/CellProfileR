@@ -1,8 +1,8 @@
 #' Plot plate heatmaps
 #' 
-#' Plot a feature (column) as a plate heatmap for each plate. Scale is uniform
-#' across all plates, such that the max value = red, min value = blue and 
-#' median value = white.
+#' Plot a feature (column) as a plate heatmap for each plate, in the current
+#' graphics device. Scale is uniform across all plates, such that the max 
+#' value = red, min value = blue and median value = white.
 #' 
 #' @param df_PW Dataframe of per well Cell Profiler data.
 #' @param column Name of the column (feature) to plot, as string. Matching

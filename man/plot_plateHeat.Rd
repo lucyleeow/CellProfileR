@@ -16,7 +16,7 @@ must be given to identify a single column in the dataframe.}
 \item{plate}{Number of wells in a plate.}
 }
 \description{
-Plot a feature (column) as a plate heatmap for each plate. Scale is uniform
-across all plates, such that the max value = red, min value = blue and 
-median value = white.
+Plot a feature (column) as a plate heatmap for each plate, in the current
+graphics device. Scale is uniform across all plates, such that the max 
+value = red, min value = blue and median value = white.
 }

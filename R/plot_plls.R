@@ -1,9 +1,7 @@
 #' Plot powerloglog slope
 #' 
 #' Plot the density of the image quality metric, powerloglog slope for a 
-#' specified channel, for each plate.
-#' 
-#' @return One density plot for each plate in current graphics device.
+#' specified channel, for each plate, in the current graphics device.
 #' 
 #' @param df Dataframe containing a 'ImageQuality_PowerLogLogSlope' column
 #' @param channel Name of the channel to be plotted, exactly as written in

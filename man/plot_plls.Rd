@@ -12,10 +12,7 @@ plot_plls(df, channel)
 \item{channel}{Name of the channel to be plotted, exactly as written in
 Cell Profiler output, as string.}
 }
-\value{
-One density plot for each plate in current graphics device.
-}
 \description{
 Plot the density of the image quality metric, powerloglog slope for a 
-specified channel, for each plate.
+specified channel, for each plate, in the current graphics device.
 }

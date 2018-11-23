@@ -36,7 +36,7 @@ CP filtered column 'Count_Cells' or CP unfiltered column
 \description{
 Determine the differences in count values between images (rows) before and
 after Cell Profiler filtering or manual filtering of poor quality and 
-present as dataframe or plot.
+present as dataframe or plot in the current graphics device.
 }
 \section{Functions}{
 \itemize{
