@@ -110,7 +110,7 @@ calc_negCtrl <- function(df, feature, annot_col, neg_ctrl){
     group_by(Metadata_Barcode) %>%
     summarise(Mean = mean(!! as.name(feature)),
               SD = sd(!! as.name(feature)),
-              CV = Mean/SD) %>%
+              CV = SD/Mean * 100) %>%
     arrange(desc(CV))
   
 }
