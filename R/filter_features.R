@@ -11,8 +11,8 @@
 #' @param df Dataframe of Cell Profiler data to be filtered.
 #' @param out_cols Single logical indicating whether the filtered column names
 #'     should be output as well.
-#' @param NA_cutoff Columns with a total number of NAs or NaNs greater than
-#'     the NA_cutoff number will be removed.
+#' @param NA_cutoff Optional argument. Columns with a total number of NAs or 
+#'     NaNs greater than the NA_cutoff number will be removed.
 #' @param freqCut Passed to \code{caret::nearZeroVar}. The cutoff for the ratio 
 #'     of the most common value to the second most common value.
 #' @param uniqueCut Passed to \code{caret::nearZeroVar}. The cutoff for the 
