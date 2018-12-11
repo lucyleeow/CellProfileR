@@ -32,8 +32,9 @@
 #'     'txlabels' column.
 #' @param allbyall Logical indicating whether to do all treatment-treatment
 #'     comparisons (TRUE) or only treatment-control comparisons.
-#' @param dirprefix Path to the directory to store results in, as string. 
-#'     This path will be created if it does not already exist.
+#' @param dirprefix Path to the directory to store results in, as string. Do 
+#'     not include the trailing '/' at the end. This path will be created if it
+#'     does not already exist.
 #' @param outfile Name of the file to save all the mp-values, as string.
 #' @param loadingsout Logical indicating whether the PCA loadings (eigenvectors)
 #'     should be output.
