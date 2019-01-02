@@ -21,6 +21,7 @@
 #' @importFrom rlang !!
 #' @import ggplot2
 #' 
+
 #' @describeIn plot_negCtrl
 #' @export
 plot_negCtrl <- function(df, feature, annot_col, neg_ctrl){
@@ -68,7 +69,6 @@ plot_negCtrl <- function(df, feature, annot_col, neg_ctrl){
   )
     
 }
-
 
 
 #' @describeIn plot_negCtrl

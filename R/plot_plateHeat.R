@@ -14,7 +14,6 @@
 #' @importFrom magrittr %>%
 #' @import ggplot2
 #' 
-
 #' @export
 plot_plateHeat <- function(df_PW, column, plate = 384) {
   
