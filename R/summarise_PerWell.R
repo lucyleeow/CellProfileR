@@ -16,7 +16,6 @@
 #' @importFrom magrittr %>%
 #' @import data.table
 #' 
-
 #' @export
 summarise_PerWell <- function(df, num_images, filtered = FALSE) {
   
