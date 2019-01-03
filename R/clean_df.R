@@ -6,14 +6,22 @@
 #'     image quality columns.
 #'     
 #' @param df Dataframe of raw Cell Profiler data.
+#' @param meta_col Name of the column that identifies the plate each 
+#'     observation belongs to, as string.
+#' 
 #'
 #' @importFrom magrittr %>%   
 #'   
 #' @export
-clean_df <- function(df) {
+clean_df <- function(df, meta_col = "Metadata_Barcode") {
+  
+  # check input
+  assert_that(is.character(meta_col), length(meta_col) == 1,
+              msg = "Check 'meta_col' is a single string")
+  
   
   df_clean <- df %>% 
-    dplyr::select(Metadata_Barcode, 
+    dplyr::select(!! as.name(meta_col), 
            Metadata_WellID,
            ImageNumber,
            Count_Cells,
