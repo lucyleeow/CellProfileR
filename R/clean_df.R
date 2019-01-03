@@ -26,8 +26,8 @@ clean_df <- function(df, meta_col = "Metadata_Barcode") {
            ImageNumber,
            Count_Cells,
            Count_Cells_unfiltered,
-           starts_with("Median"),
-           starts_with("ImageQuality_PowerLogLogSlope_Orig"))
+           dplyr::starts_with("Median"),
+           dplyr::starts_with("ImageQuality_PowerLogLogSlope_Orig"))
   
   return(df_clean)
   
