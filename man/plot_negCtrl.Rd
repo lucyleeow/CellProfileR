@@ -2,9 +2,12 @@
 % Please edit documentation in R/plot_negCtrl.R
 \name{plot_negCtrl}
 \alias{plot_negCtrl}
+\alias{calc_negCtrl}
 \title{Assess negative control wells}
 \usage{
 plot_negCtrl(df, feature, annot_col, neg_ctrl)
+
+calc_negCtrl(df, feature, annot_col, neg_ctrl)
 }
 \arguments{
 \item{df}{Dataframe of Cell Profiler data including well annotations.}
@@ -18,11 +21,16 @@ as string.}
 annotation (e.g. "DMSO"), as string.}
 }
 \description{
+Assesses the variance of a given feature in the negative control wells of 
+each plate.
+}
+\section{Functions}{
 \itemize{
-    \item \code{plot_negCtrl} Create boxplot of the negative control wells 
-    for each plate for a given feature, in the current graphics device.
-    \item \code{calc_negCtrl} will calculate the mean, standard deviation
-    and coefficient of variation for the negative control wells for each 
-    plate given a feature.
-}
-}
+\item \code{plot_negCtrl}: Create boxplot of the negative control wells 
+for each plate for a given feature, in the current graphics device.
+
+\item \code{calc_negCtrl}: Calculates the mean, standard deviation
+and coefficient of variation for the negative control wells for each 
+plate given a feature and outputs the results as a dataframe.
+}}
+

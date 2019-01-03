@@ -26,8 +26,9 @@ to be used for calculating the mp-value.}
 \item{allbyall}{Logical indicating whether to do all treatment-treatment
 comparisons (TRUE) or only treatment-control comparisons.}
 
-\item{dirprefix}{Path to the directory to store results in, as string. 
-This path will be created if it does not already exist.}
+\item{dirprefix}{Path to the directory to store results in, as string. Do 
+not include the trailing '/' at the end. This path will be created if it
+does not already exist.}
 
 \item{outfile}{Name of the file to save all the mp-values, as string.}
 

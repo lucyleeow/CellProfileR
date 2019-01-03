@@ -15,8 +15,8 @@ filter_cor(df, cor_cutoff, out_cols = FALSE)
 \arguments{
 \item{df}{Dataframe of Cell Profiler data to be filtered.}
 
-\item{NA_cutoff}{Columns with a total number of NAs or NaNs greater than
-the NA_cutoff number will be removed.}
+\item{NA_cutoff}{Optional argument. Columns with a total number of NAs or 
+NaNs greater than the NA_cutoff number will be removed.}
 
 \item{out_cols}{Single logical indicating whether the filtered column names
 should be output as well.}

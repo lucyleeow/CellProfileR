@@ -4,10 +4,13 @@
 \alias{clean_df}
 \title{Clean raw data}
 \usage{
-clean_df(df)
+clean_df(df, meta_col = "Metadata_Barcode")
 }
 \arguments{
 \item{df}{Dataframe of raw Cell Profiler data.}
+
+\item{meta_col}{Name of the column that identifies the plate each 
+observation belongs to, as string.}
 }
 \value{
 A dataframe with only the necessary plate, well, count, median and

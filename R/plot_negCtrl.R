@@ -1,12 +1,8 @@
 #' Assess negative control wells
 #' 
-#' \itemize{
-#'     \item \code{plot_negCtrl} Create boxplot of the negative control wells 
-#'     for each plate for a given feature, in the current graphics device.
-#'     \item \code{calc_negCtrl} will calculate the mean, standard deviation
-#'     and coefficient of variation for the negative control wells for each 
-#'     plate given a feature.
-#' }
+#' Assesses the variance of a given feature in the negative control wells of 
+#' each plate.
+#' 
 #' 
 #' @param df Dataframe of Cell Profiler data including well annotations.
 #' @param feature Name of the feature column to plot as string.
@@ -22,7 +18,8 @@
 #' @import ggplot2
 #' 
 
-#' @describeIn plot_negCtrl
+#' @describeIn plot_negCtrl Create boxplot of the negative control wells 
+#'     for each plate for a given feature, in the current graphics device.
 #' @export
 plot_negCtrl <- function(df, feature, annot_col, neg_ctrl){
   
@@ -71,7 +68,9 @@ plot_negCtrl <- function(df, feature, annot_col, neg_ctrl){
 }
 
 
-#' @describeIn plot_negCtrl
+#' @describeIn plot_negCtrl Calculates the mean, standard deviation
+#'     and coefficient of variation for the negative control wells for each 
+#'     plate given a feature and outputs the results as a dataframe.
 #' @export
 calc_negCtrl <- function(df, feature, annot_col, neg_ctrl){
   
