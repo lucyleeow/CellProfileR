@@ -247,7 +247,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
     txdf <- fulldata[!fulldata$tx == negctrls,];
     #LL all NOT negctrls rows
     
-    allmpvalues <- plyr::ldply(txdf, plyr::.(tx), .txtomp, ncdf=ncdf, 
+    allmpvalues <- plyr::ddply(txdf, plyr::.(tx), .txtomp, ncdf=ncdf, 
                          negctrls=negctrls, allbyall = allbyall, 
                          datacols = datacols, gammaout = gammaout,
                          pcaout = pcaout, loadingsout = loadingsout,
