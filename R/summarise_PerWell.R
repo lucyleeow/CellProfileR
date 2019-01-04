@@ -1,15 +1,22 @@
 #' Summarise Per well
 #' 
-#' Calculate the sum (for 'Count' features) or median (for 'Median' features)
-#' value of the Cell Profiler columns (features) for each well. 
+#' Calculate the sum (for 'Count' features) or median (for features starting 
+#' with 'Median' ) value of the Cell Profiler columns (features) for each well. 
+#' If only df_full is given, the sum and median of ALL images (rows) will be 
+#' output. If df_filtered is also provided, the sum of ALL images (i.e. using 
+#' df_full) will be output for 'Count' features but the median of only the 
+#' images remaining after filtering (i.e. using df_filtered) will be output for
+#' features starting with 'Median'.  
 #' 
 #' @return A dataframe or data.table (if filtered = TRUE) with one value per
 #'     well.
 #' 
-#' @param df Dataframe of raw (per image) Cell Profiler data.
+#' @param df_full Dataframe of full raw (per image) Cell Profiler data, with no
+#'     images (rows) removed.
+#' @param df_filtered Optional argument. Dataframe of filtered Cell Profiler 
+#'     data, with poor quality images removed. If given, this dataframe will be
+#'     used to calculate the median value of features that start with 'Median'.
 #' @param num_images The number of images taken per well.
-#' @param filtered Single logical indicated whether poor quality images have 
-#'     been filtered (thus the number of images per well is variable).
 #' 
 #' 
 #' @importFrom assertthat assert_that
@@ -17,37 +24,36 @@
 #' @import data.table
 #' 
 #' @export
-summarise_PerWell <- function(df, num_images, filtered = FALSE) {
+summarise_PerWell <- function(df_full, df_filtered, num_images) {
   
   # check inputs
-  assert_that(is.logical(filtered), length(filtered) == 1, 
-              msg = "Check that 'filtered' is a single logical")
-  
   assert_that(is.numeric(num_images), length(num_images) == 1, 
               msg = "Check 'num_images' is single number")
   
+  assert_that(dim(df_full)[1] %% num_images == 0, 
+              msg = "Check that there are the same number of images for each 
+              well in 'df_full'")
+  
   
   # obtain only count columns
-  df_count <- df %>% 
+  df_count <- df_full %>% 
     dplyr::select(dplyr::starts_with("Meta"), dplyr::starts_with("Count")) 
   
-  # obtain only median columns
-  df_median <- df %>% 
-    dplyr::select(dplyr::starts_with("Meta"), dplyr::starts_with("Median")) 
+  # take sum of every 'num_images' rows to get per well data
+  mat_sum <- apply(df_count[,3:ncol(df_count)], 2, 
+                   function(x) colSums(matrix(x, nrow = num_images)))
   
+
+
   # if data has not been filtered, the number of images (and thus 
   # rows) as 'num_images' for each well/plate grouping
   
-  if (! filtered){
+  if (missing(df_filtered)){
     
-    assert_that(dim(df)[1] %% num_images == 0, 
-                msg = "Check that there are the same number of images for each well")
-    
-    # take sum of every 'num_images' rows to get per well data
-    mat_sum <- apply(df_count[,3:ncol(df_count)], 2, 
-                     function(x) colSums(matrix(x, nrow = num_images)))
-    
-    
+    # obtain only median columns
+    df_median <- df_full %>% 
+      dplyr::select(dplyr::starts_with("Meta"), dplyr::starts_with("Median")) 
+
     # take median of every 'num_images' rows to get per well data
     mat_median <- apply(df_median[,3:ncol(df_median)], 2, 
                         function(x) robustbase::colMedians(
@@ -55,14 +61,9 @@ summarise_PerWell <- function(df, num_images, filtered = FALSE) {
     
     
     # get metadata rows, 1 for each well
-    df_meta <- df %>%
-      dplyr::select(Metadata_Barcode, Metadata_WellID)
+    df_meta <- df_full[,c("Metadata_Barcode","Metadata_WellID")]
     
-    nrow <- dim(df)[1]
-    repeats <- nrow/num_images
-    
-    df_meta <- df_meta[ rep(c(TRUE, rep(FALSE, num_images - 1)), 
-                            repeats), ]
+    df_meta <- unique(df_meta)
     
     
     # join summarised matrices
@@ -79,25 +80,22 @@ summarise_PerWell <- function(df, num_images, filtered = FALSE) {
     # vector of grouping column names
     grouping_cols <- c("Metadata_Barcode", "Metadata_WellID")
     
-    # join 2 dfs in list
-    df_list <- list(df_count,df_median)
-    # turn both dfs into data.table
-    df_list <- lapply(df_list, as.data.table)
+    # obtain only median columns
+    df_median <- df_filtered %>% 
+      dplyr::select(dplyr::starts_with("Meta"), dplyr::starts_with("Median"))
     
+    df_list <- as.data.table(df_median)
     
-    # get sum of count columns
-    df_count <- df_list[[1]][ , lapply(.SD,
-                                       function(x) sum(x, na.rm = TRUE)),
-                              by = grouping_cols]
     
     # get median of median columns
-    df_median <- df_list[[2]][ , lapply(.SD, 
-                                        function(x) median(x, na.rm = TRUE)),
+    df_median <- df_list[ , lapply(.SD, 
+                                   function(x) median(x, na.rm = TRUE)),
                                by = grouping_cols]
     
     
     # as order is preserved, cbind columns together
-    df_final <- cbind(df_count, df_median[ , 3:ncol(df_median)])
+    df_final <- cbind(df_median[ , 1:2], mat_sum, 
+                      df_median[ , 3:ncol(df_median)])
     
   }
   

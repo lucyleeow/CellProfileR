@@ -4,21 +4,28 @@
 \alias{summarise_PerWell}
 \title{Summarise Per well}
 \usage{
-summarise_PerWell(df, num_images, filtered = FALSE)
+summarise_PerWell(df_full, df_filtered, num_images)
 }
 \arguments{
-\item{df}{Dataframe of raw (per image) Cell Profiler data.}
+\item{df_full}{Dataframe of full raw (per image) Cell Profiler data, with no
+images (rows) removed.}
+
+\item{df_filtered}{Optional argument. Dataframe of filtered Cell Profiler 
+data, with poor quality images removed. If given, this dataframe will be
+used to calculate the median value of features that start with 'Median'.}
 
 \item{num_images}{The number of images taken per well.}
-
-\item{filtered}{Single logical indicated whether poor quality images have 
-been filtered (thus the number of images per well is variable).}
 }
 \value{
 A dataframe or data.table (if filtered = TRUE) with one value per
     well.
 }
 \description{
-Calculate the sum (for 'Count' features) or median (for 'Median' features)
-value of the Cell Profiler columns (features) for each well.
+Calculate the sum (for 'Count' features) or median (for features starting 
+with 'Median' ) value of the Cell Profiler columns (features) for each well. 
+If only df_full is given, the sum and median of ALL images (rows) will be 
+output. If df_filtered is also provided, the sum of ALL images (i.e. using 
+df_full) will be output for 'Count' features but the median of only the 
+images remaining after filtering (i.e. using df_filtered) will be output for
+features starting with 'Median'.
 }
