@@ -179,6 +179,9 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   finalmpvalues <- plyr::ldply(finalmpvalues, data.frame);
   
   cat("Writing output file\n");
+  
+  outfile <- paste(dirprefix, outfile, sep = "/")
+  
   write.table(finalmpvalues, file=outfile, append=FALSE, sep="\t", 
               row.names=FALSE, col.names=TRUE, quote=FALSE);
   
