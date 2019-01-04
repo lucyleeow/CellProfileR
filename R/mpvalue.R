@@ -24,12 +24,14 @@
 #' @param dataset Dataframe containing all data where each row is a sample and
 #'     each columns is a feature/variable.
 #' @param txlabels Name of the column containing the treatment labels, as 
-#'     string.
+#'     string. Each desired treatment group should have a unique label, within
+#'     each batch (e.g. a treatment can have the same label in each batch as
+#'     long as within one batch, the label uniquely identifies the treatment).
 #' @param batchlabels Name of the column containing the batch labels, as string
-#' @param datacols Vector of column numbers containing the feature/variable data
-#'     to be used for calculating the mp-value.
-#' @param negctrls The string identifying the negative control, in the 
-#'     'txlabels' column.
+#' @param datacols Vector of the column indicies that contain the 
+#'     feature/variable data to be used for calculating the mp-value.
+#' @param negctrls The name of the negative controls, in the 'txlabels' column,
+#'     as string.
 #' @param allbyall Logical indicating whether to do all treatment-treatment
 #'     comparisons (TRUE) or only treatment-control comparisons.
 #' @param dirprefix Path to the directory to store results in, as string. Do 
@@ -38,7 +40,7 @@
 #' @param outfile Name of the file to save all the mp-values, as string.
 #' @param loadingsout Logical indicating whether the PCA loadings (eigenvectors)
 #'     should be output.
-#' @param pcaout Logical indicating whether to output PCA values
+#' @param pcaout Logical indicating whether to output PCA values.
 #' @param gammaout Logical indicating whether to output gamma distribution
 #'     parameters, p-value of goodness of fit and sample p-value according to 
 #'     the fit distribution.
@@ -97,8 +99,8 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   
   for (i in 1:length(logical_args)){
     
-    msg <- paste("Check that '", names(logical_args)[i], "' is a single logical",
-                 sep = "")
+    msg <- paste("Check that '", names(logical_args)[i],
+                 "' is a single logical", sep = "")
     
     assert_that(is.logical(logical_args[[i]]), length(logical_args[[i]]) == 1,
                 msg = msg)
@@ -122,7 +124,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
     
   }
   
-  if (pcaout) {
+  if (loadingsout) {
     
     dir_loadings <- paste(dirprefix, "/loadings", sep = "")
     
@@ -153,16 +155,16 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
     # Limit the dataset to only those batches with at least 
     # 1 negative control
     goodbatches <- unique(dataset$batch[dataset$tx == negctrls]);
+    # badbatches are batches NOT in goodbatches
     badbatches <- unique(dataset$batch)[!unique(dataset$batch) %in% goodbatches];
     
     if (length(badbatches) <= 0) {
       cat("All batches contain at least 1 negative control.", fill=TRUE);
-    } else if (length(badbatches >= 1)) {
+    } else {
       cat("The following batches do not contain negative controls and will be removed:", 
           badbatches, fill=TRUE);
-    } else {
-      cat("All batches contain at least 1 negative control")
     }
+    
     dataset <- dataset[dataset$batch %in% goodbatches,];
   }
   
@@ -244,7 +246,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
     txdf <- fulldata[!fulldata$tx == negctrls,];
     #LL all NOT negctrls rows
     
-    allmpvalues <- plyr::dlply(txdf, plyr::.(tx), .txtomp, ncdf=ncdf, 
+    allmpvalues <- plyr::llply(txdf, plyr::.(tx), .txtomp, ncdf=ncdf, 
                          negctrls=negctrls, allbyall = allbyall, 
                          datacols = datacols, gammaout = gammaout,
                          pcaout = pcaout, loadingsout = loadingsout,
@@ -252,7 +254,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
     #LL group by tx, apply function .txtomp to every group. Arguments to .txtomp
     # ncdf and negctrls as given 
     
-    allmpvalues <- plyr::ldply(allmpvalues, data.frame);
+    #allmpvalues <- plyr::ldply(allmpvalues, data.frame);
     
   }
   
