@@ -4,13 +4,17 @@
 \alias{plot_plls}
 \title{Plot powerloglog slope}
 \usage{
-plot_plls(df, channel)
+plot_plls(df, channel, scale)
 }
 \arguments{
 \item{df}{Dataframe containing a 'ImageQuality_PowerLogLogSlope' column}
 
 \item{channel}{Name of the channel to be plotted, exactly as written in
 Cell Profiler output, as string.}
+
+\item{scale}{Single logical. If TRUE the scale of all plots will be uniform.
+The x-axis limits will be set to the min and max of the powerloglog slope 
+for all plates.}
 }
 \description{
 Plot the density of the image quality metric, powerloglog slope for a 
