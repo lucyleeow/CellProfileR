@@ -107,7 +107,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
     
   }
   
-  # creat dirs
+  # create dirs
   if (pcaout) {
     
     dir_pca <- paste(dirprefix, "/pcaout", sep = "")
@@ -140,12 +140,11 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
     
   }
 
+  ###### Actual function starts here  ###### 
   
   # Standardizing variable names
   dataset$batch <- as.character(dataset[[batchlabels]]);
   dataset$tx <- as.character(dataset[[txlabels]]);
-
-  
 
   # Print all batches:
   cat("All batches:", fill=TRUE);
@@ -171,12 +170,11 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
   
   # This breaks up the dataset by batch and sends them to be
   # further broken up by treatment
-  finalmpvalues <- plyr::dlply(dataset, plyr::.(batch), .batchtotx,
+  finalmpvalues <- plyr::ddply(dataset, plyr::.(batch), .batchtotx,
                                allbyall = allbyall, negctrls = negctrls,
                                datacols = datacols, gammaout = gammaout,
                                pcaout = pcaout, loadingsout = loadingsout,
                                dirprefix = dirprefix);
-  finalmpvalues <- plyr::ldply(finalmpvalues, data.frame);
   
   cat("Writing output file\n");
   
@@ -225,13 +223,10 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
       #LL data of all the tx's to compare the to 'ith' tx ('negctrl') to 
       # i.e. all unique tx's after the ith tx.
       
-      tempmpvalues <- plyr::dlply(comparisontx_data, plyr::.(tx), .txtomp, 
+      tempmpvalues <- plyr::ddply(comparisontx_data, plyr::.(tx), .txtomp, 
                                   ncdf=ncdf, negctrls=negctrls);
       #LL input: df, output: list. Group by the tx column, perform the function
       # .txtomp, with the 'ncdf' and 'negctrls' arguments as given 
-      
-      tempmpvalues <- plyr::ldply(tempmpvalues, data.frame);
-      #LL create a dataframe???
       
       
       if (i == 1) { #LL
@@ -260,8 +255,6 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
                          dirprefix = dirprefix);
     #LL group by tx, apply function .txtomp to every group. Arguments to .txtomp
     # ncdf and negctrls as given 
-    
-    #allmpvalues <- plyr::ldply(allmpvalues, data.frame);
     
   }
   
