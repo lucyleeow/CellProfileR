@@ -105,12 +105,12 @@ calc_negCtrl <- function(df, feature, annot_col, neg_ctrl){
   
   
   df %>% 
-    filter(!! as.name(annot_col) == "DMSO") %>%
-    group_by(Metadata_Barcode) %>%
-    summarise(Mean = mean(!! as.name(feature)),
-              SD = sd(!! as.name(feature)),
-              CV = SD/Mean * 100) %>%
-    arrange(desc(CV))
+    dplyr::filter(!! as.name(annot_col) == "DMSO") %>%
+    dplyr::group_by(Metadata_Barcode) %>%
+    dplyr::summarise(Mean = mean(!! as.name(feature)),
+                     SD = sd(!! as.name(feature)),
+                     CV = SD/Mean * 100) %>%
+    dplyr::arrange(dplyr::desc(CV))
   
 }
 
