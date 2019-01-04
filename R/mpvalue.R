@@ -176,6 +176,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
                                pcaout = pcaout, loadingsout = loadingsout,
                                dirprefix = dirprefix);
   finalmpvalues <- plyr::ldply(finalmpvalues, data.frame);
+  
   cat("Writing output file\n");
   write.table(finalmpvalues, file=outfile, append=FALSE, sep="\t", 
               row.names=FALSE, col.names=TRUE, quote=FALSE);
@@ -246,7 +247,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
     txdf <- fulldata[!fulldata$tx == negctrls,];
     #LL all NOT negctrls rows
     
-    allmpvalues <- plyr::llply(txdf, plyr::.(tx), .txtomp, ncdf=ncdf, 
+    allmpvalues <- plyr::ldply(txdf, plyr::.(tx), .txtomp, ncdf=ncdf, 
                          negctrls=negctrls, allbyall = allbyall, 
                          datacols = datacols, gammaout = gammaout,
                          pcaout = pcaout, loadingsout = loadingsout,
