@@ -168,6 +168,7 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
     dataset <- dataset[dataset$batch %in% goodbatches,];
   }
   
+  
   # This breaks up the dataset by batch and sends them to be
   # further broken up by treatment
   finalmpvalues <- plyr::dlply(dataset, plyr::.(batch), .batchtotx,
@@ -240,6 +241,8 @@ mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls,
     } # end of for loop
     
   } else { #LL if NOT allbyall
+    
+    print("onto .batchtotx")
     
     ncdf <- fulldata[fulldata$tx == negctrls,];
     #LL negative control df, 'negctrls' here is the one input by the user 
