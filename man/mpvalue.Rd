@@ -13,15 +13,17 @@ mpvalue(dataset, txlabels, batchlabels, datacols, negctrls,
 each columns is a feature/variable.}
 
 \item{txlabels}{Name of the column containing the treatment labels, as 
-string.}
+string. Each desired treatment group should have a unique label, within
+each batch (e.g. a treatment can have the same label in each batch as
+long as within one batch, the label uniquely identifies the treatment).}
 
 \item{batchlabels}{Name of the column containing the batch labels, as string}
 
-\item{datacols}{Vector of column numbers containing the feature/variable data
-to be used for calculating the mp-value.}
+\item{datacols}{Vector of the column indicies that contain the 
+feature/variable data to be used for calculating the mp-value.}
 
-\item{negctrls}{The string identifying the negative control, in the 
-'txlabels' column.}
+\item{negctrls}{The name of the negative controls, in the 'txlabels' column,
+as string.}
 
 \item{allbyall}{Logical indicating whether to do all treatment-treatment
 comparisons (TRUE) or only treatment-control comparisons.}
@@ -35,7 +37,7 @@ does not already exist.}
 \item{loadingsout}{Logical indicating whether the PCA loadings (eigenvectors)
 should be output.}
 
-\item{pcaout}{Logical indicating whether to output PCA values}
+\item{pcaout}{Logical indicating whether to output PCA values.}
 
 \item{gammaout}{Logical indicating whether to output gamma distribution
 parameters, p-value of goodness of fit and sample p-value according to 
