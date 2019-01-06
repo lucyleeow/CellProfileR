@@ -36,19 +36,20 @@ plot_plls <- function(df, channel, scale) {
     plots <- df %>%
       dplyr::group_by(Metadata_Barcode) %>%
       dplyr::do(plots = ggplot(data = ., aes_string(x = columnName)) + 
-                  geom_density() +
+                  geom_density(fill = "#7570b3", alpha = 0.5) +
                   coord_cartesian(xlim = c(min_plls,max_plls)) +
-                  labs(title = .$Metadata_Barcode[1])
+                  labs(title = .$Metadata_Barcode[1]) +
+                  theme_minimal()
       )
     
   } else {
     
     plots <- df %>%
       dplyr::group_by(Metadata_Barcode) %>%
-      dplyr::do(plots = ggplot(data = ., 
-                               aes_string(x = columnName)) + 
-                  geom_density() +
-                  labs(title = .$Metadata_Barcode[1])
+      dplyr::do(plots = ggplot(data = ., aes_string(x = columnName)) + 
+                  geom_density(fill = "#7570b3", alpha = 0.5) +
+                  labs(title = .$Metadata_Barcode[1]) +
+                  theme_minimal()
       )
     
   }
