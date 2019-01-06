@@ -11,10 +11,10 @@
 #' @importFrom assertthat assert_that
 #' @import ggplot2
 #' 
-#' @describeIn plot_mpvalue Creates a density plot of the MP values, in the 
+#' @describeIn plot_mp Creates a density plot of the MP values, in the 
 #'     current graphics device.
 #' @export
-plot_mpvalue <- function(mp_df, mp_col = "mp.value") {
+plot_mp <- function(mp_df, mp_col = "mp.value") {
   
   # check inputs
   assert_that(is.character(mp_col), length(mp_col) == 1,
@@ -34,7 +34,7 @@ plot_mpvalue <- function(mp_df, mp_col = "mp.value") {
 }
 
 
-#' @describeIn plot_mpvalue Creates a density plot of the Mahalanobis distances,
+#' @describeIn plot_mp Creates a density plot of the Mahalanobis distances,
 #'     in the current graphics device.
 #' @export
 plot_Mdist <- function(mp_df, Mdist_col = "Mahalanobis") {
@@ -55,9 +55,4 @@ plot_Mdist <- function(mp_df, Mdist_col = "Mahalanobis") {
     theme(plot.title = element_text(hjust = 0.5))
   
 }
-
-
-
-
-
 

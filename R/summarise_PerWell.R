@@ -24,7 +24,7 @@
 #' @import data.table
 #' 
 #' @export
-summarise_PerWell <- function(df_full, df_filtered, num_images) {
+summarise_perWell <- function(df_full, df_filtered, num_images) {
   
   # check inputs
   assert_that(is.numeric(num_images), length(num_images) == 1, 
