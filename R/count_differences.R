@@ -34,9 +34,10 @@ plot_countFilt <- function(df_raw) {
   df_raw %>%
     dplyr::mutate(count_diff = Count_Cells_unfiltered - Count_Cells) %>%
     ggplot(aes(x = count_diff)) +
-    geom_density() +
+    geom_density(fill = "#7570b3", alpha = 0.5) +
     labs(title = "Difference between unfiltered & filtered count",
-         x = "Count difference")
+         x = "Count difference") +
+    theme_minimal()
   
 }
 
@@ -170,9 +171,10 @@ plot_countImageQC <- function(df_raw, df_filtered, CP_unfiltered = FALSE) {
   plots <- diff_df %>%
     dplyr::group_by(Metadata_Barcode) %>%
     dplyr::do(plots = ggplot(data = ., aes(x = diff)) +
-         geom_density() +
+         geom_density(fill = "#7570b3", alpha = 0.5) +
          labs(title = .$Metadata_Barcode[1], y = "Density",
-              x = "Difference in count before and after image QC")
+              x = "Difference in count before and after image QC") + 
+           theme_minimal()
     )
   
   for (i in 1:length(unique(diff_df$Metadata_Barcode))){
