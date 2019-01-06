@@ -15,10 +15,16 @@
 #
 #-------------------------------------------------------------------------------------------------
 
-#' mp-value
+#' Calculate mp-values
 #' 
-#' Calculate mp-values as described in 
+#' Calculate multidimensional perterbation value (mp-value) as described in 
 #' \href{https://journals.sagepub.com/doi/10.1177/1087057112469257}{Hutz et al.}.
+#' Briefly, the mp-value can be used to determine whether any two treatments 
+#' differ from each other and is similar in spirit to the p-value. This 
+#' function was written by Hutz *et al.*.
+#'  
+#' Minor changes to the code and additional comments added are identified by a
+#' 'LL' next to the change.
 #' 
 #' 
 #' @param dataset Dataframe containing all data where each row is a sample and
@@ -53,7 +59,7 @@
 #' 
 
 #' @export
-mpvalue <- function(dataset, txlabels, batchlabels, datacols, negctrls, 
+calc_mp <- function(dataset, txlabels, batchlabels, datacols, negctrls, 
                     allbyall=FALSE, dirprefix, outfile="all_mp-values.txt",  
                     loadingsout=FALSE, pcaout=FALSE, gammaout=FALSE) {
   
