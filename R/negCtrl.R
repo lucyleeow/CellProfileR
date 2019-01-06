@@ -62,7 +62,8 @@ plot_negCtrl <- function(df, feature, annot_col, neg_ctrl){
     ggplot(aes_string(y = feature, x = "Metadata_Barcode")) + 
     geom_boxplot() + 
     labs(title = title) +
-    coord_flip()
+    coord_flip() + 
+    theme_minimal()
   )
     
 }
