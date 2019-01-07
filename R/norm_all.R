@@ -78,8 +78,6 @@ norm_all <- function(df, data_cols, count_col = "Count_Cells", compound_col,
     dplyr::do(reshape::rescaler(., type = rescale_type)) %>%
     dplyr::ungroup()
   
-  print("norz_z done")
-  
   ## rename count column
   colnames(norm_z)[colnames(norm_z) == count_col] <- "CP_Zscore_Count_Cells"
 
@@ -92,8 +90,6 @@ norm_all <- function(df, data_cols, count_col = "Count_Cells", compound_col,
                   na.rm = TRUE))) %>%
     dplyr::ungroup() %>%
     dplyr::select(CP_NormToNeg_Count_Cells)
-  
-  print("norm to neg done")
   
   
   # Raw count data
