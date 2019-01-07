@@ -90,6 +90,7 @@ norm_all <- function(df, data_cols, count_col = "Count_Cells", compound_col,
     dplyr::do(mutate(., CP_NormToNeg_Count_Cells = .[[count_col]] /
              mean(.[[count_col]][.[[compound_col]] == negCtrl], 
                   na.rm = TRUE))) %>%
+    dplyr::ungroup() %>%
     dplyr::select(CP_NormToNeg_Count_Cells)
   
   print("norm to neg done")
@@ -106,6 +107,13 @@ norm_all <- function(df, data_cols, count_col = "Count_Cells", compound_col,
   final_df <- cbind(norm_z[,-data_cols], CP_RAW_count, 
                     CP_NormToNeg_Count_Cells, norm_z[,"CP_Zscore_Count_Cells"],
                     norm_z[,med_cols])
+  
+  
+  if (! is.data.frame(final_df)) {
+    
+    final_df <- as.data.frame(final_df)
+    
+  }
   
   return(final_df)
   
