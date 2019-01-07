@@ -30,8 +30,8 @@ plot_plls <- function(df, channel, scale) {
   # make plots
   if (scale) {
     
-    min_plls <- min(data_raw[[columnName]])
-    max_plls <- max(data_raw[[columnName]])
+    min_plls <- min(data_raw[[columnName]], na.rm = TRUE)
+    max_plls <- max(data_raw[[columnName]], na.rm = TRUE)
     
     plots <- df %>%
       dplyr::group_by(Metadata_Barcode) %>%
