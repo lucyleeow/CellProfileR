@@ -104,7 +104,3 @@ summarise_perWell <- function(df_full, df_filtered, num_images) {
 }
 
 
-
-
-
-
