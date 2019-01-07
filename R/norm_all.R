@@ -80,11 +80,12 @@ norm_all <- function(df, data_cols, count_col = "Count_Cells", compound_col,
   
   ## rename count column
   colnames(norm_z)[colnames(norm_z) == count_col] <- "CP_Zscore_Count_Cells"
+
   
   # norm to DMSO
   CP_NormToNeg_Count_Cells <- df %>%
     dplyr::group_by(batch) %>%
-    dplyr::do(., mutate(CP_NormToNeg_Count_Cells = .[[count_col]] /
+    dplyr::do(mutate(., CP_NormToNeg_Count_Cells = .[[count_col]] /
              mean(.[[count_col]][.[[compound_col]] == negCtrl], 
                   na.rm = TRUE))) %>%
     dplyr::select(CP_NormToNeg_Count_Cells)
