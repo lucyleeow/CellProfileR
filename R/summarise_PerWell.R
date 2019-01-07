@@ -43,8 +43,8 @@ summarise_perWell <- function(df_full, df_filtered, num_images) {
   mat_sum <- apply(df_count[,3:ncol(df_count)], 2, 
                    function(x) colSums(matrix(x, nrow = num_images)))
   
-
-
+  
+  
   # if data has not been filtered, the number of images (and thus 
   # rows) as 'num_images' for each well/plate grouping
   
@@ -53,7 +53,7 @@ summarise_perWell <- function(df_full, df_filtered, num_images) {
     # obtain only median columns
     df_median <- df_full %>% 
       dplyr::select(dplyr::starts_with("Meta"), dplyr::starts_with("Median")) 
-
+    
     # take median of every 'num_images' rows to get per well data
     mat_median <- apply(df_median[,3:ncol(df_median)], 2, 
                         function(x) robustbase::colMedians(
@@ -90,7 +90,7 @@ summarise_perWell <- function(df_full, df_filtered, num_images) {
     # get median of median columns
     df_median <- df_list[ , lapply(.SD, 
                                    function(x) median(x, na.rm = TRUE)),
-                               by = grouping_cols]
+                          by = grouping_cols]
     
     
     # as order is preserved, cbind columns together
@@ -102,5 +102,9 @@ summarise_perWell <- function(df_full, df_filtered, num_images) {
   return(df_final)
   
 }
+
+
+
+
 
 
