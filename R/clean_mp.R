@@ -46,7 +46,7 @@ clean_mp <- function(mp_df, sep, tx_col = "tx") {
   compound <- sapply(strsplit(mp_df[[tx_col]], sep), 
                      function(x) paste(x[1:(length(x) - 1)], collapse = sep))
   
-  mp_df$compound <- compound
+  mp_df$compound <- as.character(compound)
   
   # re-order columns
   mp_ncols <- ncol(mp_df)
