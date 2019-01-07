@@ -5,14 +5,14 @@
 \title{Normalise data}
 \usage{
 norm_all(df, data_cols, count_col = "Count_Cells", compound_col, negCtrl,
-  rescale_type = "robust")
+  rescale_type = "robust", plate_col = "Metadata_Barcode")
 }
 \arguments{
 \item{df}{Dataframe containing the CellProfiler data to normalise.}
 
-\item{data_cols}{Indicies of the data columns of df. All of these columns
-should be of numerice type. All remaining (non 'data_cols') should NOT 
-be of numeric type.}
+\item{data_cols}{Numeric vector. Indicies of the data columns of df. All of 
+these columns should be of numerice type. All remaining (non 'data_cols')
+should NOT be of numeric type.}
 
 \item{count_col}{Name of the column containing the raw cell counts, as 
 string.}
@@ -24,6 +24,8 @@ details.}
 
 \item{rescale_type}{Type of rescaling to use, as string. Will be passed to 
 \code{reshape::rescaler}.}
+
+\item{plate_col}{Name of the column containing the plate IDs.}
 }
 \value{
 A dataframe with the following columns, (in order): 
