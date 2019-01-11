@@ -45,6 +45,12 @@ summarise_perWell <- function(df_full, df_filtered, num_images) {
                    function(x) colSums(matrix(x, nrow = num_images)))
   
   
+  # add metadata (for use when df_filtered provided)
+  df_annot <- unique(df_count[,1:2])
+  
+  df_count_sum <- cbind(df_annot, mat_sum)
+  
+  
   # if data has not been filtered, the number of images (and thus 
   # rows) as 'num_images' for each well/plate grouping
   
@@ -65,7 +71,6 @@ summarise_perWell <- function(df_full, df_filtered, num_images) {
       dplyr::select(dplyr::starts_with("Meta"))
     
     df_meta <- unique(df_meta)
-    
     
     # join summarised matrices
     full_mat <- cbind(mat_sum, mat_median)
@@ -98,9 +103,10 @@ summarise_perWell <- function(df_full, df_filtered, num_images) {
                           by = grouping_cols]
     
 
-    # as order is preserved, cbind columns together
-    df_final <- cbind(df_median[ , 1:2], mat_sum, 
-                      df_median[ , 3:numcol])
+    # merge count sum and medians, as number of unique plates and wells
+    # may differ between filtered and full data (e.g. if a complete well was
+    # filtered out)
+    df_final <- merge(df_count_sum, df_median, by = grouping_cols)
     
   }
   
