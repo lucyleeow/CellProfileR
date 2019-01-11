@@ -103,7 +103,7 @@ summarise_perWell <- function(df_full, df_filtered, num_images) {
                           by = grouping_cols]
     
     # print dimensions
-    cat("Dimensions of: count dataframe:", dim(df_count_sum))
+    cat("Dimensions of: count dataframe:", dim(df_count_sum), "\n")
     
     cat("Dimensions of: median dataframe:", dim(df_median))
 
