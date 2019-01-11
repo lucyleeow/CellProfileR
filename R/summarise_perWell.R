@@ -44,7 +44,6 @@ summarise_perWell <- function(df_full, df_filtered, num_images) {
                    function(x) colSums(matrix(x, nrow = num_images)))
   
   
-  
   # if data has not been filtered, the number of images (and thus 
   # rows) as 'num_images' for each well/plate grouping
   
@@ -84,12 +83,17 @@ summarise_perWell <- function(df_full, df_filtered, num_images) {
     df_median <- df_filtered %>% 
       dplyr::select(dplyr::starts_with("Meta"), dplyr::starts_with("Median"))
     
-    df_list <- as.data.table(df_median)
+    df_median <- as.data.table(df_median)
     
+    # convert all data columns to double type
+    numcol <- ncol(df_median)
+    
+    df_median <- df_median[ ,colnames(df_median)[3:numcol] := lapply(.SD, 
+                                                                     as.double),
+                            .SDcols = 3:numcol]
     
     # get median of median columns
-    df_median <- df_list[ , lapply(.SD, 
-                                   function(x) median(x, na.rm = TRUE)),
+    df_median <- df_median[ , lapply(.SD, function(x) median(x, na.rm = TRUE)),
                           by = grouping_cols]
     
     
