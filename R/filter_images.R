@@ -11,14 +11,20 @@
 #'     device.
 #' }
 #' 
-#' @param df Dataframe of raw Cell Profiler data, where each row is 1 image
+#' @param df Dataframe of raw CellProfiler data, where each row is 1 image
 #'     NOT one well.
 #' @param num_IQR Number of IQR's below the 25% quantile to place cutoff 
 #'     threshold.
-#' @param filtered_df Dataframe of Cell Profiler data that has been filtered
-#'     for poor quality images (rows).
+#' @param filtered_df The plate ID column of the dataframe of CellProfiler 
+#'     data that has been filtered for poor quality data, as a vector. E.g.
+#'     if the plate ID column from the filtered dataframe \code{filtered_df}
+#'     is called 'Metadata_Barcode', \code{filtered_df[,'Metadata_Barcode']} 
+#'     should be used.
 #' @param num_images The number of images taken per well.
-#' @param wells The number of wells per plate
+#' @param annot The plate ID column from the annotation data, as a vector. E.g.
+#'     if the plate ID column from the \code{annot} dataframe is called 
+#'     'VCFG_Compound_Plate_ID', \code{annot[,'VCFG_Compound_Plate_ID']} should
+#'     be used.
 #' 
 #' 
 #' @importFrom assertthat assert_that
@@ -96,7 +102,7 @@ filterImages <- function(df, num_IQR) {
 #' @describeIn filterImages Creates bar graph of the number of images filtered 
 #'     for each plate.
 #' @export
-plotFiltered <- function(filtered_df, num_images, wells = 384) {
+plotFiltered <- function(filtered_df, num_images, annot) {
   
   # check inputs
   assert_that(is.numeric(num_images), length(num_images) == 1,
@@ -106,15 +112,25 @@ plotFiltered <- function(filtered_df, num_images, wells = 384) {
               msg = "Check 'wells' is single number")
   
   
+  # calculate number of used wells per plate
+  wells <- table(annot)
+  
+  # calculate the number of rows per plate in the filtered data
+  images_perPlate <- table(filtered_df)
+  
+  # calculate the number of filtered images
+  num_filtered <- data.frame((wells * num_images) - images_perPlate)
+  
   # make plot
-  filtered_df %>%
-    dplyr::group_by(Metadata_Barcode) %>%
-    dplyr::do(num_images * wells - dplyr::count(.)) %>%
-    ggplot(aes(y=n, x=Metadata_Barcode)) +
+  num_filtered %>%
+    dplyr::group_by(Var1) %>%
+    ggplot(aes(y=Freq, x=Var1)) +
     geom_bar(stat = "identity") +
     labs(title = "Number of images filtered", y = "Number of images",
          x = "Plate") + 
-    coord_flip()
+    coord_flip() +
+    theme_minimal() +
+    theme(plot.title = element_text(hjust = 0.5))
   
 }
 

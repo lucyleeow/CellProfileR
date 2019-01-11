@@ -7,21 +7,27 @@
 \usage{
 filterImages(df, num_IQR)
 
-plotFiltered(filtered_df, num_images, wells = 384)
+plotFiltered(filtered_df, num_images, annot)
 }
 \arguments{
-\item{df}{Dataframe of raw Cell Profiler data, where each row is 1 image
+\item{df}{Dataframe of raw CellProfiler data, where each row is 1 image
 NOT one well.}
 
 \item{num_IQR}{Number of IQR's below the 25% quantile to place cutoff 
 threshold.}
 
-\item{filtered_df}{Dataframe of Cell Profiler data that has been filtered
-for poor quality images (rows).}
+\item{filtered_df}{The plate ID column of the dataframe of CellProfiler 
+data that has been filtered for poor quality data, as a vector. E.g.
+if the plate ID column from the filtered dataframe \code{filtered_df}
+is called 'Metadata_Barcode', \code{filtered_df[,'Metadata_Barcode']} 
+should be used.}
 
 \item{num_images}{The number of images taken per well.}
 
-\item{wells}{The number of wells per plate}
+\item{annot}{The plate ID column from the annotation data, as a vector. E.g.
+if the plate ID column from the \code{annot} dataframe is called 
+'VCFG_Compound_Plate_ID', \code{annot[,'VCFG_Compound_Plate_ID']} should
+be used.}
 }
 \value{
 \itemize{
