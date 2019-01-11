@@ -49,6 +49,11 @@ plot_countFilt <- function(df_raw) {
 #' @export
 df_countFilt <- function(df_raw, n = 10) {
   
+  # check input
+  assert_that(is.numeric(n), length(n) == 1,
+              msg = "Check 'n' is a single number")
+  
+  
   df_raw %>%
     dplyr::select(dplyr::starts_with("Meta"),
            ImageNumber,
