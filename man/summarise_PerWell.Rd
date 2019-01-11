@@ -4,22 +4,18 @@
 \alias{summarise_perWell}
 \title{Summarise Per well}
 \usage{
-summarise_perWell(df_full, df_filtered, num_images,
-  plateID_col = "Metadata_Barcode")
+summarise_perWell(df_full, df_filtered, num_images)
 }
 \arguments{
 \item{df_full}{Dataframe of full raw (per image) Cell Profiler data, with no
 images (rows) removed.}
 
 \item{df_filtered}{Optional argument. Dataframe of filtered Cell Profiler 
-data, with poor quality images removed. If given, this dataframe will be
-used to calculate the median value of features that start with 'Median'.}
+data, with poor quality images (rows) removed. If given, this dataframe 
+will be used to calculate the median value of features that start with 
+'Median'.}
 
 \item{num_images}{The number of images taken per well.}
-
-\item{pateID_col}{Name of the column in 'df_full' and df_filtered' that 
-contains the plate IDs. Note that the name should be the same in both
-of these two dataframes.}
 }
 \value{
 A dataframe or data.table (if 'df_filtered' provided) with one value 
@@ -27,7 +23,7 @@ A dataframe or data.table (if 'df_filtered' provided) with one value
 }
 \description{
 Calculate the sum (for 'Count' features) or median (for features starting 
-with 'Median' ) value of the Cell Profiler columns (features) for each well. 
+with 'Median') value of the Cell Profiler columns (features) for each well. 
 If only df_full is given, the sum and median of ALL images (rows) will be 
 output. If df_filtered is also provided, the sum of ALL images (i.e. using 
 df_full) will be output for 'Count' features but the median of only the 

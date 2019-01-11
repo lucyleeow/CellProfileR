@@ -26,7 +26,6 @@
 #' @param negCtrl Name of the negative control compound.
 #' @param rescale_type Type of rescaling to use, as string. Will be passed to 
 #'     \code{reshape::rescaler}.
-#' @param plate_col Name of the column containing the plate IDs.
 #'
 #'
 #'
@@ -35,8 +34,7 @@
 #' 
 #' @export
 norm_all <- function(df, data_cols, count_col = "Count_Cells", compound_col, 
-                     negCtrl, rescale_type = "robust", 
-                     plate_col = "Metadata_Barcode") {
+                     negCtrl, rescale_type = "robust") {
   
   # check inputs
   assert_that(is.numeric(data_cols), 
@@ -84,7 +82,7 @@ norm_all <- function(df, data_cols, count_col = "Count_Cells", compound_col,
   
   # norm to DMSO
   CP_NormToNeg_Count_Cells <- df %>%
-    dplyr::group_by(!! as.name(plate_col)) %>%
+    dplyr::group_by(Metadata_Barcode) %>%
     dplyr::do(mutate(., CP_NormToNeg_Count_Cells = .[[count_col]] /
              mean(.[[count_col]][.[[compound_col]] == negCtrl], 
                   na.rm = TRUE))) %>%

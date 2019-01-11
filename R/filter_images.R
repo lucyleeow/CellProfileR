@@ -22,11 +22,16 @@
 #'     \code{filtered_df[,'Metadata_Barcode']} OR 
 #'     \code{filtered_df[['Metadata_Barcode']]} can be used.
 #' @param num_images The number of images taken per well.
-#' @param annot The plate ID column from the annotation data, as a vector or
-#'     dataframe. E.g. if the plate ID column from the \code{annot} dataframe 
-#'     is called 'VCFG_Compound_Plate_ID', 
+#' @param annot Optional argument. The plate ID column from the annotation data,
+#'     as a vector or dataframe. E.g. if the plate ID column from the 
+#'     \code{annot} dataframe is called 'VCFG_Compound_Plate_ID', 
 #'     \code{annot[,'VCFG_Compound_Plate_ID']} OR
-#'     \code{annot[['VCFG_Compound_Plate_ID']]} can be used.
+#'     \code{annot[['VCFG_Compound_Plate_ID']]} can be used. If given, the 
+#'     number of filtered images (rows) will be calculated as: 
+#'     (number of used wells) * \code{num_images} - (number of images remaining
+#'     after filtering). If not given, it will be assumed that all wells were 
+#'     used.
+#' @param num_wells Number of wells per plate.     
 #' 
 #' 
 #' @importFrom assertthat assert_that
@@ -105,11 +110,14 @@ filterImages <- function(df, num_IQR) {
 #' @describeIn filterImages Creates bar graph of the number of images filtered 
 #'     for each plate.
 #' @export
-plotFiltered <- function(filtered_df, annot, num_images) {
+plotFiltered <- function(filtered_df, num_images, annot, num_wells) {
   
   # check inputs
   assert_that(is.numeric(num_images), length(num_images) == 1,
               msg = "Check 'num_images' is single number")
+  
+  assert_that(is.numeric(num_wells), length(num_wells) == 1,
+              msg = "Check 'num_wells' is single number")
   
   if (! is.null(dim(filtered_df))) {
     
@@ -127,7 +135,12 @@ plotFiltered <- function(filtered_df, annot, num_images) {
   
   
   # calculate number of used wells per plate
-  wells <- table(annot)
+  if (! missing(annot)) {
+    wells <- table(annot)
+  } else {
+    wells <- num_wells
+  }
+  
   
   # calculate the number of rows per plate in the filtered data
   images_perPlate <- table(filtered_df)

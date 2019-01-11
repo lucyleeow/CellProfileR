@@ -7,7 +7,7 @@
 \usage{
 filterImages(df, num_IQR)
 
-plotFiltered(filtered_df, annot, num_images)
+plotFiltered(filtered_df, num_images, annot, num_wells)
 }
 \arguments{
 \item{df}{Dataframe of raw CellProfiler data, where each row is 1 image
@@ -23,13 +23,19 @@ vector. E.g. if the plate ID column from the filtered dataframe
 \code{filtered_df[,'Metadata_Barcode']} OR 
 \code{filtered_df[['Metadata_Barcode']]} can be used.}
 
-\item{annot}{The plate ID column from the annotation data, as a vector or
-dataframe. E.g. if the plate ID column from the \code{annot} dataframe 
-is called 'VCFG_Compound_Plate_ID', 
-\code{annot[,'VCFG_Compound_Plate_ID']} OR
-\code{annot[['VCFG_Compound_Plate_ID']]} can be used.}
-
 \item{num_images}{The number of images taken per well.}
+
+\item{annot}{Optional argument. The plate ID column from the annotation data,
+as a vector or dataframe. E.g. if the plate ID column from the 
+\code{annot} dataframe is called 'VCFG_Compound_Plate_ID', 
+\code{annot[,'VCFG_Compound_Plate_ID']} OR
+\code{annot[['VCFG_Compound_Plate_ID']]} can be used. If given, the 
+number of filtered images (rows) will be calculated as: 
+(number of used wells) * \code{num_images} - (number of images remaining
+after filtering). If not given, it will be assumed that all wells were 
+used.}
+
+\item{num_wells}{Number of wells per plate.}
 }
 \value{
 \itemize{
