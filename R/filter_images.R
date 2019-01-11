@@ -52,26 +52,27 @@ filterImages <- function(df, num_IQR) {
   
   ## check powerloglog column(s) exist 
   assert_that(length(plls_columns) > 0,
-              msg = "Check that there is at least one 'ImageQuality_PowerLogLogSlope_Orig' 
+              msg = "Check that there is at least one 'ImageQuality_PowerLogLogSlope_Orig-' 
               column in 'df'")
+  
   
   
   # thresholding function
   threshold_fun <- function(group_df){
     
-    # obtain only columns of interest
-    reduced_df <- group_df[,plls_columns]
+  # obtain only columns of interest
+  reduced_df <- group_df[,plls_columns]
     
-    # create empty threshold vector
-    threshold <- vector(mode = "numeric", length = length(plls_columns))
+  # create empty threshold vector
+  threshold <- vector(mode = "numeric", length = length(plls_columns))
     
     
-    # fill vector with threshold for each channel (i.e. powerloglog column)
-    for (i in 1:length(plls_columns)){
-      
-      threshold[i] <- 
-        quantile(reduced_df[,i][[1]], 0.25) - 
-        ( num_IQR * IQR(reduced_df[,i][[1]]) )
+  # fill vector with threshold for each channel (i.e. powerloglog column)
+  for (i in 1:length(plls_columns)){
+    
+    threshold[i] <- 
+    quantile(reduced_df[,i][[1]], 0.25, na.rm = TRUE) - 
+    ( num_IQR * IQR(reduced_df[,i][[1]], na.rm = TRUE) )
       
     }
     
