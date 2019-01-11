@@ -7,7 +7,7 @@
 \usage{
 filterImages(df, num_IQR)
 
-plotFiltered(filtered_df, num_images, annot)
+plotFiltered(filtered_df, annot, num_images)
 }
 \arguments{
 \item{df}{Dataframe of raw CellProfiler data, where each row is 1 image
@@ -22,12 +22,12 @@ if the plate ID column from the filtered dataframe \code{filtered_df}
 is called 'Metadata_Barcode', \code{filtered_df[,'Metadata_Barcode']} 
 should be used.}
 
-\item{num_images}{The number of images taken per well.}
-
 \item{annot}{The plate ID column from the annotation data, as a vector. E.g.
 if the plate ID column from the \code{annot} dataframe is called 
 'VCFG_Compound_Plate_ID', \code{annot[,'VCFG_Compound_Plate_ID']} should
 be used.}
+
+\item{num_images}{The number of images taken per well.}
 }
 \value{
 \itemize{

@@ -102,7 +102,7 @@ filterImages <- function(df, num_IQR) {
 #' @describeIn filterImages Creates bar graph of the number of images filtered 
 #'     for each plate.
 #' @export
-plotFiltered <- function(filtered_df, num_images, annot) {
+plotFiltered <- function(filtered_df, annot, num_images) {
   
   # check inputs
   assert_that(is.numeric(num_images), length(num_images) == 1,
