@@ -125,7 +125,6 @@ plotFiltered <- function(filtered_df, annot, num_images) {
   }
   
   
-  
   # calculate number of used wells per plate
   wells <- table(annot)
   
@@ -135,10 +134,10 @@ plotFiltered <- function(filtered_df, annot, num_images) {
   # calculate the number of filtered images
   num_filtered <- data.frame((wells * num_images) - images_perPlate)
   
+  nfilt_columns <- colnames(num_filtered)
+  
   # make plot
-  num_filtered %>%
-    dplyr::group_by(Var1) %>%
-    ggplot(aes(y=Freq, x=Var1)) +
+  ggplot(num_filtered, aes_string(x = nfilt_columns[1], y = nfilt_columns[2])) +
     geom_bar(stat = "identity") +
     labs(title = "Number of images filtered", y = "Number of images",
          x = "Plate") + 
