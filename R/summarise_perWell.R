@@ -110,7 +110,7 @@ summarise_perWell <- function(df_full, df_filtered, num_images) {
     # merge count sum and medians, as number of unique plates and wells
     # may differ between filtered and full data (e.g. if a complete well was
     # filtered out)
-    df_final <- merge(df_count_sum, df_median, by = grouping_cols)
+    df_final <- merge(df_count_sum, df_median, by = grouping_cols, all = TRUE)
     
   }
   
