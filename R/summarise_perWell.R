@@ -103,9 +103,9 @@ summarise_perWell <- function(df_full, df_filtered, num_images) {
                           by = grouping_cols]
     
     # print dimensions
-    cat("Dimensions of: count dataframe:", dim(df_count_sum), "\n")
+    cat("Dimensions of count dataframe:", dim(df_count_sum), "\n")
     
-    cat("Dimensions of: median dataframe:", dim(df_median))
+    cat("Dimensions of median dataframe:", dim(df_median))
 
     # merge count sum and medians, as number of unique plates and wells
     # may differ between filtered and full data (e.g. if a complete well was
