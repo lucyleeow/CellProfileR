@@ -8,8 +8,8 @@
 #' images remaining after filtering (i.e. using df_filtered) will be output for
 #' features starting with 'Median'.  
 #' 
-#' @return A dataframe or data.table (if filtered = TRUE) with one value per
-#'     well.
+#' @return A dataframe or data.table (if 'df_filtered' provided) with one value 
+#'     per well.
 #' 
 #' @param df_full Dataframe of full raw (per image) Cell Profiler data, with no
 #'     images (rows) removed.
@@ -17,6 +17,9 @@
 #'     data, with poor quality images removed. If given, this dataframe will be
 #'     used to calculate the median value of features that start with 'Median'.
 #' @param num_images The number of images taken per well.
+#' @param pateID_col Name of the column in 'df_full' and df_filtered' that 
+#'     contains the plate IDs. Note that the name should be the same in both
+#'     of these two dataframes.
 #' 
 #' 
 #' @importFrom assertthat assert_that
@@ -24,7 +27,8 @@
 #' @import data.table
 #' 
 #' @export
-summarise_perWell <- function(df_full, df_filtered, num_images) {
+summarise_perWell <- function(df_full, df_filtered, num_images, 
+                              plateID_col = "Metadata_Barcode") {
   
   # check inputs
   assert_that(is.numeric(num_images), length(num_images) == 1, 
@@ -60,7 +64,8 @@ summarise_perWell <- function(df_full, df_filtered, num_images) {
     
     
     # get metadata rows, 1 for each well
-    df_meta <- df_full[,c("Metadata_Barcode","Metadata_WellID")]
+    df_meta <- df_full %>%
+      dplyr::select(dplyr::starts_with("Meta"))
     
     df_meta <- unique(df_meta)
     
@@ -77,7 +82,7 @@ summarise_perWell <- function(df_full, df_filtered, num_images) {
     # This take MUCH longer than above function 
     
     # vector of grouping column names
-    grouping_cols <- c("Metadata_Barcode", "Metadata_WellID")
+    grouping_cols <- c(plateID_col, "Metadata_WellID")
     
     # obtain only median columns
     df_median <- df_filtered %>% 
@@ -88,18 +93,17 @@ summarise_perWell <- function(df_full, df_filtered, num_images) {
     # convert all data columns to double type
     numcol <- ncol(df_median)
     
-    df_median <- df_median[ ,colnames(df_median)[3:numcol] := lapply(.SD, 
-                                                                     as.double),
+    df_median <- df_median[ ,3:numcol := lapply(.SD, as.double), 
                             .SDcols = 3:numcol]
     
     # get median of median columns
     df_median <- df_median[ , lapply(.SD, function(x) median(x, na.rm = TRUE)),
                           by = grouping_cols]
     
-    
+
     # as order is preserved, cbind columns together
     df_final <- cbind(df_median[ , 1:2], mat_sum, 
-                      df_median[ , 3:ncol(df_median)])
+                      df_median[ , 3:numcol])
     
   }
   
