@@ -16,15 +16,17 @@
 #' @param num_IQR Number of IQR's below the 25% quantile to place cutoff 
 #'     threshold.
 #' @param filtered_df The plate ID column of the dataframe of CellProfiler 
-#'     data that has been filtered for poor quality data, as a vector. E.g.
-#'     if the plate ID column from the filtered dataframe \code{filtered_df}
-#'     is called 'Metadata_Barcode', \code{filtered_df[,'Metadata_Barcode']} 
-#'     should be used.
+#'     data that has been filtered for poor quality data, as a dataframe or 
+#'     vector. E.g. if the plate ID column from the filtered dataframe 
+#'     \code{filtered_df} is called 'Metadata_Barcode', 
+#'     \code{filtered_df[,'Metadata_Barcode']} OR 
+#'     \code{filtered_df[['Metadata_Barcode']]} can be used.
 #' @param num_images The number of images taken per well.
-#' @param annot The plate ID column from the annotation data, as a vector. E.g.
-#'     if the plate ID column from the \code{annot} dataframe is called 
-#'     'VCFG_Compound_Plate_ID', \code{annot[,'VCFG_Compound_Plate_ID']} should
-#'     be used.
+#' @param annot The plate ID column from the annotation data, as a vector or
+#'     dataframe. E.g. if the plate ID column from the \code{annot} dataframe 
+#'     is called 'VCFG_Compound_Plate_ID', 
+#'     \code{annot[,'VCFG_Compound_Plate_ID']} OR
+#'     \code{annot[['VCFG_Compound_Plate_ID']]} can be used.
 #' 
 #' 
 #' @importFrom assertthat assert_that
@@ -108,8 +110,20 @@ plotFiltered <- function(filtered_df, annot, num_images) {
   assert_that(is.numeric(num_images), length(num_images) == 1,
               msg = "Check 'num_images' is single number")
   
-  assert_that(is.numeric(wells), length(wells) == 1,
-              msg = "Check 'wells' is single number")
+  if (! is.null(dim(filtered_df))) {
+    
+    assert_that(dim(filtered_df)[2] == 1, 
+                msg = "Check 'filtered_df' only contains one column")
+    
+  }
+  
+  if (! is.null(dim(annot))) {
+    
+    assert_that(dim(annot)[2] == 1, 
+                msg = "Check 'annot' only contains one column")
+    
+  }
+  
   
   
   # calculate number of used wells per plate
