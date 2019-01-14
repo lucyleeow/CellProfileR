@@ -102,7 +102,7 @@ filterImages <- function(df, num_IQR) {
     df %>%
       dplyr::group_by(Metadata_Barcode) %>%
       dplyr::do(threshold_fun(.)) %>%
-      dplyr::ungroup
+      dplyr::ungroup()
   )
   
 }
