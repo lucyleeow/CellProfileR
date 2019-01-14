@@ -11,7 +11,7 @@
 #'     device.
 #' }
 #' 
-#' @param df Dataframe of raw CellProfiler data, where each row is 1 image
+#' @param df Dataframe of raw CellProfiler data, where each row is one image
 #'     NOT one well.
 #' @param num_IQR Number of IQR's below the 25% quantile to place cutoff 
 #'     threshold.
@@ -126,12 +126,17 @@ plotFiltered <- function(filtered_df, num_images, annot, num_wells) {
     
   }
   
-  if (! is.null(dim(annot))) {
+  if (! missing(annot)) {
     
-    assert_that(dim(annot)[2] == 1, 
-                msg = "Check 'annot' only contains one column")
+    if (! is.null(dim(annot))) {
+      
+      assert_that(dim(annot)[2] == 1, 
+                  msg = "Check 'annot' only contains one column")
+      
+    }
     
   }
+
   
   
   # calculate number of used wells per plate
