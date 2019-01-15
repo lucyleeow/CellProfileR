@@ -44,7 +44,7 @@ norm_all <- function(df, data_cols, count_col = "Count_Cells", compound_col,
   
   # check inputs
   assert_that(is.numeric(data_cols), 
-              msg = "Check 'data_cols' are all of numeric type")
+              msg = "Check 'data_cols' is a numeric vector")
   
   
   ## character inputs
