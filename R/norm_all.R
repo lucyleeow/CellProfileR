@@ -4,12 +4,18 @@
 #' normalise all data columns. Also calculates count value normalised to the
 #' negative control, for each plate, and retains the raw count value.
 #' 
+#'  
 #' @return A dataframe with the following columns, (in order): 
 #' \itemize{
 #'     \item Annotation columns (all non-data columns).
-#'     \item Cell count columns: raw cell count, cell count normalised to 
-#'     negative control, z score normalised cell count (using 
-#'     \code{reshape::rescaler}).
+#'     \item Cell count columns: raw cell count (the \code{count_col} column 
+#'     from \code{df}), cell count normalised to negative control, z score 
+#'     normalised cell count (using \code{reshape::rescaler}). The latter two 
+#'     columns are both calculated using the \code{count_col} column 
+#'     from \code{df}. Note that there should only be ONE count column. If 
+#'     \code{df} has more than one count column (e.g. 'count_cells' AND 
+#'     'count_cells_unfiltered" columns), delete these such that only one 
+#'     remains.
 #'     \item All remaining data columns z score normalised (using 
 #'     \code{reshape::rescaler}). All of these columns names will be the same 
 #'     as the input dataframe.
@@ -38,7 +44,7 @@ norm_all <- function(df, data_cols, count_col = "Count_Cells", compound_col,
   
   # check inputs
   assert_that(is.numeric(data_cols), 
-              msg = "Check 'data_cols' is of numeric type")
+              msg = "Check 'data_cols' are all of numeric type")
   
   
   ## character inputs
