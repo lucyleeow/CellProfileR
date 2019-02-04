@@ -13,11 +13,7 @@
 #' @export
 clean_df <- function(df) {
   
-  # check input
-  assert_that(is.character(meta_col), length(meta_col) == 1,
-              msg = "Check 'meta_col' is a single string")
-  
-  
+
   df_clean <- df %>% 
     dplyr::select(Metadata_Barcode, 
                   Metadata_WellID,
