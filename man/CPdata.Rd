@@ -4,8 +4,7 @@
 \name{CPdata}
 \alias{CPdata}
 \title{Raw CellProfiler data}
-\format{A data.table with 1600 rows (800 rows per plate), and 371 
-variables:
+\format{A dataframe with 800 rows (400 rows per plate), and 218 variables:
 \describe{
     \item{Metadata_Barcode}{Plate ID.}
     \item{Metadata_WellID}{Well ID. The plate is numbered such that the 
@@ -32,7 +31,7 @@ then used to extract phenotype data from images taken of each well.
 \details{
 Each row provides metatdata and information extracted by 
 CellProfiler from one image taken of cells grown in one well. There were
-four rows (images) taken per well. There were two 384 well plates. Only 200 
+four rows (images taken) per well. There were two 384 well plates. Only 100 
 wells from each 384 well plate were included to minimise the size of the data 
 set. A number of columns output by CellProfiler were also removed (including 
 'Mean' and 'StDev' columns) to minimise the size of the data set.
