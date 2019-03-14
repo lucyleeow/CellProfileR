@@ -1,6 +1,6 @@
 #' Raw CellProfiler data
 #' 
-#' Raw CellProfiler data from imaging cells in a 384 (24 by 16) well plate. 
+#' Raw CellProfiler data from imaging cells in a 3 (24 by 16) well plate. 
 #' Cells in each well were exposed to a different compound, left to grow and
 #' then imaged using three stains; CMFDA, DAPI and Phalloidin. CellProfiler was 
 #' then used to extract phenotype data from images taken of each well.
@@ -15,9 +15,9 @@
 #' Details of how the CellProfiler columns were named are as follows:
 #' \describe{
 #'     \item{MeasurementType}{This tells you the type of data contained in the
-#'       measurement. Most columns are 'Median', which means that the median
-#'       value of that measurement, for all cells identified in that image, is
-#'       provided.}
+#'       measurement, if relevant. This is often 'Median', which means that the 
+#'       median value of that measurement, for all cells identified in that 
+#'       image, is provided.}
 #'     \item{Location}{The location of the cell this measurement is from. This
 #'       is generally 'Nuclei', 'Cytoplasm' or 'Actin' (which captures  
 #'       cell cytoskeleton details.)}
@@ -53,4 +53,4 @@
 #' 
 #' 
 #' 
-"CP_data"
+"CPdata"
