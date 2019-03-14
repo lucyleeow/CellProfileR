@@ -4,7 +4,7 @@
 \name{CP_data}
 \alias{CP_data}
 \title{Raw CellProfiler data}
-\format{A data.table with 1600 rows, 800 rows per plate, and 371 
+\format{A data.table with 1600 rows (800 rows per plate), and 371 
 variables:
 \describe{
     \item{Metadata_Barcode}{Plate ID.}
@@ -44,7 +44,7 @@ Details of how the CellProfiler columns were named are as follows:
       value of that measurement, for all cells identified in that image, is
       provided.}
     \item{Location}{The location of the cell this measurement is from. This
-      is often 'Nuclei', 'Cytoplasm' or 'Actin' (which captures  
+      is generally 'Nuclei', 'Cytoplasm' or 'Actin' (which captures  
       cell cytoskeleton details.)}
     \item{Category}{Description of the type of measurement taken. For 
       example 'AreaShape' provides information about the area or shape of
@@ -53,7 +53,7 @@ Details of how the CellProfiler columns were named are as follows:
     \item{SpecificFeatureName}{Details about the measurement made.}
 }
 
-More details about how each column (variable) is named and how each variable 
+More details about how each variable (column) is named and how each variable 
 is calculated can be found in the 
 \href{http://cellprofiler-manual.s3.amazonaws.com/CellProfiler-3.1.5/index.html}{CellProfiler documentation}.
 }
